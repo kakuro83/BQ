@@ -102,7 +102,7 @@ if not df_ejercicio.empty:
 
         # --- Estrategia de purificación ---
         st.subheader("⚗️ Estrategia de Purificación")
-        tecnicas = df_purificacion["Columna"].dropna().unique().tolist()
+        tecnicas = df_purificacion["Técnica"].dropna().unique().tolist()
         etapas = []
 
         for i in range(1, 5):
