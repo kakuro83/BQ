@@ -3,6 +3,9 @@
 import pandas as pd
 import requests
 import io
+import streamlit as st
+
+st.title("📥 Carga de datos - Sistema de Cromatografía")
 
 # --- 1. Google Sheets (sin API externa, desde CSV export) ---
 def cargar_csv_desde_google(url):
@@ -11,7 +14,7 @@ def cargar_csv_desde_google(url):
         response.raise_for_status()
         return pd.read_csv(io.StringIO(response.text)).dropna(how="all")
     except requests.exceptions.HTTPError as e:
-        print(f"❌ Error al cargar CSV desde: {url}\n{e}")
+        st.error(f"❌ Error al cargar CSV desde: {url}\n{e}")
         return pd.DataFrame()
 
 # ID real del documento compartido y GID de las hojas
@@ -25,11 +28,10 @@ hoja_columnas = cargar_csv_desde_google(url_columnas)
 hoja_fijos = cargar_csv_desde_google(url_fijos)
 
 if not hoja_fijos.empty:
-    print("\n📌 Encabezados de 'DatosFijos':", list(hoja_fijos.columns))
     if "Parámetro" in hoja_fijos.columns and "Valor" in hoja_fijos.columns:
         parametros_fijos = dict(zip(hoja_fijos["Parámetro"], hoja_fijos["Valor"]))
     else:
-        print("⚠️ Las columnas esperadas 'Parámetro' y 'Valor' no están presentes en 'DatosFijos'.")
+        st.warning("⚠️ Las columnas esperadas 'Parámetro' y 'Valor' no están presentes en 'DatosFijos'.")
         parametros_fijos = {}
 else:
     parametros_fijos = {}
@@ -45,13 +47,35 @@ try:
     response = requests.get(url_excel)
     df_respuestas = pd.read_excel(io.BytesIO(response.content), engine="openpyxl")
 except ImportError:
-    print("⚠️ Falta el paquete 'openpyxl'. Agrega 'openpyxl' en requirements.txt para leer archivos Excel.")
+    st.warning("⚠️ Falta el paquete 'openpyxl'. Agrega 'openpyxl' en requirements.txt para leer archivos Excel.")
     df_respuestas = pd.DataFrame()
 
-# Verificación (opcional)
-print("\n✅ Datos cargados correctamente (sin APIs externas):")
-print(f"- Proteínas: {len(hoja_proteinas)} entradas")
-print(f"- Columnas: {len(hoja_columnas)} técnicas")
-print(f"- Parámetros fijos: {len(parametros_fijos)}")
-print(f"- Estudiantes: {len(lista_estudiantes)}")
-print(f"- Respuestas cargadas: {df_respuestas.shape[0]} filas")
+# Verificación visual en Streamlit
+st.success("✅ Datos cargados correctamente (sin APIs externas):")
+st.markdown(f"- **Proteínas:** {len(hoja_proteinas)} entradas")
+st.markdown(f"- **Columnas:** {len(hoja_columnas)} técnicas")
+st.markdown(f"- **Parámetros fijos:** {len(parametros_fijos)}")
+st.markdown(f"- **Estudiantes:** {len(lista_estudiantes)}")
+st.markdown(f"- **Respuestas cargadas:** {df_respuestas.shape[0]} filas")
+
+# Mostrar ejemplos
+with st.expander("👁 Ver muestra de las tablas cargadas"):
+    if not hoja_proteinas.empty:
+        st.subheader("🔬 Proteínas")
+        st.dataframe(hoja_proteinas.head())
+
+    if not hoja_columnas.empty:
+        st.subheader("🧪 Columnas de purificación")
+        st.dataframe(hoja_columnas.head())
+
+    if parametros_fijos:
+        st.subheader("⚙️ Parámetros fijos")
+        st.dataframe(pd.DataFrame(parametros_fijos.items(), columns=["Parámetro", "Valor"]))
+
+    if lista_estudiantes:
+        st.subheader("👤 Lista de estudiantes")
+        st.write(lista_estudiantes[:5])
+
+    if not df_respuestas.empty:
+        st.subheader("📄 Respuestas registradas")
+        st.dataframe(df_respuestas.head())
