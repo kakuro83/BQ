@@ -7,16 +7,19 @@ import io
 # --- 1. Google Sheets (sin API externa, desde CSV export) ---
 # Exportar cada hoja como CSV directamente desde el enlace público
 
-def cargar_csv_desde_google(sheet_id, gid):
-    url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={gid}"
-    return pd.read_csv(url).dropna()
+def cargar_csv_desde_google(url):
+    response = requests.get(url)
+    response.raise_for_status()  # Lanza error si falla
+    return pd.read_csv(io.StringIO(response.text)).dropna()
 
-sheet_id = "1Rqk1GZ3Y5KKNT5VjTXI-pbFhlVZ-c-XcCCjmXAM6DiQ"
+# Enlaces actualizados a las hojas en formato CSV (usar enlaces confirmados públicamente)
+url_proteinas = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRcf1jOr-2yFpsVoAv2XD_qPMu2qjchHZnGgYZd1EEl2B8uK8ycoBa5q9oQlsJxAaO8_d1xydYrGQ3S/pub?gid=0&single=true&output=csv"
+url_columnas = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRcf1jOr-2yFpsVoAv2XD_qPMu2qjchHZnGgYZd1EEl2B8uK8ycoBa5q9oQlsJxAaO8_d1xydYrGQ3S/pub?gid=830674505&single=true&output=csv"
+url_fijos = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRcf1jOr-2yFpsVoAv2XD_qPMu2qjchHZnGgYZd1EEl2B8uK8ycoBa5q9oQlsJxAaO8_d1xydYrGQ3S/pub?gid=1578172910&single=true&output=csv"
 
-# Cargar las hojas específicas (usa el GID de cada hoja)
-hoja_proteinas = cargar_csv_desde_google(sheet_id, "0")  # VariablesEjercicio
-hoja_columnas = cargar_csv_desde_google(sheet_id, "830674505")  # ColumnasPurificación
-hoja_fijos = cargar_csv_desde_google(sheet_id, "1578172910")  # DatosFijos
+hoja_proteinas = cargar_csv_desde_google(url_proteinas)
+hoja_columnas = cargar_csv_desde_google(url_columnas)
+hoja_fijos = cargar_csv_desde_google(url_fijos)
 
 # Convertir a diccionario de parámetros
 parametros_fijos = dict(zip(hoja_fijos["Parámetro"], hoja_fijos["Valor"]))
