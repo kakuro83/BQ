@@ -28,6 +28,7 @@ hoja_columnas = cargar_csv_desde_google(url_columnas)
 hoja_fijos = cargar_csv_desde_google(url_fijos)
 
 if not hoja_fijos.empty:
+    st.write("📋 Columnas de 'DatosFijos':", hoja_fijos.columns.tolist())
     if "Parámetro" in hoja_fijos.columns and "Valor" in hoja_fijos.columns:
         parametros_fijos = dict(zip(hoja_fijos["Parámetro"], hoja_fijos["Valor"]))
     else:
@@ -57,6 +58,22 @@ st.markdown(f"- **Columnas:** {len(hoja_columnas)} técnicas")
 st.markdown(f"- **Parámetros fijos:** {len(parametros_fijos)}")
 st.markdown(f"- **Estudiantes:** {len(lista_estudiantes)}")
 st.markdown(f"- **Respuestas cargadas:** {df_respuestas.shape[0]} filas")
+
+# Mensajes de ayuda en caso de error
+if hoja_proteinas.empty:
+    st.error("❌ No se cargaron datos de proteínas.")
+
+if hoja_columnas.empty:
+    st.error("❌ No se cargaron datos de columnas de purificación.")
+
+if not parametros_fijos:
+    st.warning("⚠️ No se cargaron los parámetros fijos correctamente.")
+
+if not lista_estudiantes:
+    st.warning("⚠️ No se cargó la lista de estudiantes.")
+
+if df_respuestas.empty:
+    st.info("ℹ️ No hay respuestas registradas aún.")
 
 # Mostrar ejemplos
 with st.expander("👁 Ver muestra de las tablas cargadas"):
