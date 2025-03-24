@@ -34,8 +34,13 @@ lista_estudiantes = pd.read_csv(estudiantes_url, header=None)[0].dropna().tolist
 
 # --- 3. Excel para registro de respuestas desde GitHub (público raw) ---
 url_excel = "https://raw.githubusercontent.com/kakuro83/BQ/3698fd9da17043e75779d8897fd0fe622229dfba/Respuestas.xlsx"
-response = requests.get(url_excel)
-df_respuestas = pd.read_excel(io.BytesIO(response.content))
+try:
+    import openpyxl  # asegúrate de que esté disponible
+    response = requests.get(url_excel)
+    df_respuestas = pd.read_excel(io.BytesIO(response.content), engine="openpyxl")
+except ImportError:
+    print("⚠️ Falta el paquete 'openpyxl'. Agrega 'openpyxl' en requirements.txt para leer archivos Excel.")
+    df_respuestas = pd.DataFrame()
 
 # Verificación (opcional)
 print("✅ Datos cargados correctamente (sin APIs externas):")
