@@ -10,11 +10,11 @@ st.title("🏆 Olimpiada de Bioquímica – Estrategia de Purificación de Prote
 # --- Enlace base para exportar como CSV desde Google Sheets ---
 url_hoja = "https://docs.google.com/spreadsheets/d/1Rqk1GZ3Y5KKNT5VjTXI-pbFhlVZ-c-XcCCjmXAM6DiQ/export?format=csv&gid="
 
-# Diccionario de pestañas (hojas) y sus IDs (gid)
+# Diccionario de pestañas (hojas) y sus IDs (gid) corregidos
 sheets = {
     "Ejercicio": "0",
-    "Purificación": "1798027090",
-    "Datos": "1730716012"
+    "Purificación": "1556529394",
+    "Datos": "1236785904"
 }
 
 # Función para cargar una hoja con manejo de errores
