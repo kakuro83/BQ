@@ -47,17 +47,49 @@ url_datos = "https://raw.githubusercontent.com/kakuro83/BQ/07db0129a42190db7c548
 df_purificacion = cargar_csv_desde_github(url_purificacion, "Purificación")
 df_datos = cargar_csv_desde_github(url_datos, "Datos")
 
-# --- Mostrar vista previa si se cargaron correctamente ---
-if not df_ejercicio.empty:
-    st.subheader("🧪 Proteína Objetivo y Condiciones Iniciales")
-    st.dataframe(df_ejercicio)
+# --- Mostrar Datos Fijos y Columnas de Purificación ---
+if not df_datos.empty:
+    st.subheader("📊 Datos Fijos")
+    st.dataframe(df_datos)
 
 if not df_purificacion.empty:
-    st.subheader("🧬 Columnas de Purificación Disponibles")
+    st.subheader("🧬 Información de las Columnas de Purificación")
     st.dataframe(df_purificacion)
 
-if not df_datos.empty:
-    st.subheader("📊 Parámetros Globales del Sistema")
-    st.dataframe(df_datos)
+# --- Selección de proteína objetivo ---
+if not df_ejercicio.empty:
+    st.subheader("🧪 Selección de Proteína Objetivo")
+    lista_proteinas = ["Seleccionar proteína"] + df_ejercicio["Nombre"].dropna().tolist()
+    seleccion = st.selectbox("Seleccione una proteína para visualizar sus propiedades:", lista_proteinas)
+
+    if seleccion != "Seleccionar proteína":
+        df_proteina = df_ejercicio[df_ejercicio["Nombre"] == seleccion].copy()
+
+        # Mostrar propiedades generales excluyendo columnas Banda A–E
+        columnas_bandas = [col for col in df_proteina.columns if col.startswith("Banda")]
+        df_info = df_proteina.drop(columns=columnas_bandas).T
+        df_info.columns = ["Valor"]
+        st.markdown("### 🔬 Propiedades Generales de la Proteína")
+        st.dataframe(df_info)
+
+        # Procesar y mostrar datos de bandas SDS-PAGE
+        st.markdown("### 🧫 Análisis SDS-PAGE (Bandas Detectadas)")
+        bandas = []
+        for col in columnas_bandas:
+            datos = df_proteina.iloc[0][col]
+            if pd.notna(datos):
+                valores = datos.split(";")
+                if len(valores) == 4:
+                    bandas.append({
+                        "Banda": col.split()[-1],
+                        "Recorrido": valores[0],
+                        "Abundancia (%)": valores[1],
+                        "Carga neta": valores[2],
+                        "Propiedad estructural": valores[3]
+                    })
+
+        if bandas:
+            df_bandas = pd.DataFrame(bandas)
+            st.dataframe(df_bandas)
 
 st.info("Esta es la vista base de los datos. A partir de aquí construiremos la lógica para diseñar la estrategia de purificación.")
