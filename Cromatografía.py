@@ -28,9 +28,9 @@ def cargar_hoja(nombre, gid):
 
 # Función para cargar un CSV desde GitHub
 @st.cache_data
-def cargar_csv_desde_github(url_raw, nombre):
+def cargar_csv_desde_github(url_raw, nombre, header='infer', names=None):
     try:
-        df = pd.read_csv(url_raw)
+        df = pd.read_csv(url_raw, header=header, names=names)
         st.success(f"✅ Hoja '{nombre}' cargada correctamente desde GitHub.")
         return df
     except Exception as e:
@@ -47,7 +47,7 @@ url_estudiantes = "https://raw.githubusercontent.com/kakuro83/BQ/main/Estudiante
 
 df_purificacion = cargar_csv_desde_github(url_purificacion, "Purificación")
 df_datos = cargar_csv_desde_github(url_datos, "Datos")
-df_estudiantes = cargar_csv_desde_github(url_estudiantes, "Estudiantes")
+df_estudiantes = cargar_csv_desde_github(url_estudiantes, "Estudiantes", header=None, names=["Estudiante"])
 
 # --- Mostrar Datos Fijos y Columnas de Purificación ---
 if not df_datos.empty:
