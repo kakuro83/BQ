@@ -43,9 +43,11 @@ df_ejercicio = cargar_hoja("Ejercicio", sheets["Ejercicio"])
 # --- Cargar hojas 'Purificación' y 'Datos' desde CSV en GitHub ---
 url_purificacion = "https://raw.githubusercontent.com/kakuro83/BQ/07db0129a42190db7c548d2be1e7939e24e06833/Purificaci%C3%B3n.csv"
 url_datos = "https://raw.githubusercontent.com/kakuro83/BQ/07db0129a42190db7c548d2be1e7939e24e06833/Datos.csv"
+url_estudiantes = "https://raw.githubusercontent.com/kakuro83/BQ/main/Estudiantes.txt"
 
 df_purificacion = cargar_csv_desde_github(url_purificacion, "Purificación")
 df_datos = cargar_csv_desde_github(url_datos, "Datos")
+df_estudiantes = cargar_csv_desde_github(url_estudiantes, "Estudiantes")
 
 # --- Mostrar Datos Fijos y Columnas de Purificación ---
 if not df_datos.empty:
@@ -55,6 +57,12 @@ if not df_datos.empty:
 if not df_purificacion.empty:
     st.subheader("🧬 Información de las Columnas de Purificación")
     st.dataframe(df_purificacion)
+
+# --- Selección de estudiante ---
+if not df_estudiantes.empty:
+    st.subheader("👤 Selección de Estudiante")
+    lista_estudiantes = df_estudiantes["Estudiante"].dropna().tolist()
+    estudiante = st.selectbox("Seleccione su nombre:", lista_estudiantes)
 
 # --- Selección de proteína objetivo ---
 if not df_ejercicio.empty:
@@ -91,5 +99,21 @@ if not df_ejercicio.empty:
         if bandas:
             df_bandas = pd.DataFrame(bandas)
             st.dataframe(df_bandas)
+
+        # --- Estrategia de purificación ---
+        st.subheader("⚗️ Estrategia de Purificación")
+        tecnicas = df_purificacion["Columna"].dropna().unique().tolist()
+        etapas = []
+
+        for i in range(1, 5):
+            st.markdown(f"**Etapa {i}**")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                tecnica = st.selectbox(f"Técnica {i}", ["Seleccionar"] + tecnicas, key=f"tecnica_{i}")
+            with col2:
+                corridas = st.number_input(f"Corridas {i}", min_value=1, step=1, key=f"corridas_{i}")
+            with col3:
+                velocidad = st.number_input(f"Velocidad (mg/min) {i}", min_value=0.1, step=0.1, key=f"velocidad_{i}")
+            etapas.append({"Etapa": i, "Técnica": tecnica, "Corridas": corridas, "Velocidad": velocidad})
 
 st.info("Esta es la vista base de los datos. A partir de aquí construiremos la lógica para diseñar la estrategia de purificación.")
