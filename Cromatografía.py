@@ -27,15 +27,20 @@ hoja_proteinas = cargar_csv_desde_google(url_proteinas)
 hoja_columnas = cargar_csv_desde_google(url_columnas)
 hoja_fijos = cargar_csv_desde_google(url_fijos)
 
+# Depuración avanzada para hoja de datos fijos
+parametros_fijos = {}
 if not hoja_fijos.empty:
-    st.write("📋 Columnas de 'DatosFijos':", hoja_fijos.columns.tolist())
-    if "Parámetro" in hoja_fijos.columns and "Valor" in hoja_fijos.columns:
+    st.write("📋 Columnas detectadas en 'DatosFijos':", hoja_fijos.columns.tolist())
+    columnas = [col.strip().lower() for col in hoja_fijos.columns]
+    if "parámetro" in columnas and "valor" in columnas:
+        # Normalizar columnas
+        hoja_fijos.columns = [col.strip().capitalize() for col in hoja_fijos.columns]
         parametros_fijos = dict(zip(hoja_fijos["Parámetro"], hoja_fijos["Valor"]))
     else:
-        st.warning("⚠️ Las columnas esperadas 'Parámetro' y 'Valor' no están presentes en 'DatosFijos'.")
-        parametros_fijos = {}
+        st.warning("⚠️ Las columnas esperadas 'Parámetro' y 'Valor' no están correctamente nombradas o formateadas.")
+        st.dataframe(hoja_fijos.head())
 else:
-    parametros_fijos = {}
+    st.warning("⚠️ No se pudo cargar la hoja 'DatosFijos'.")
 
 # --- 2. TXT de Estudiantes desde GitHub ---
 estudiantes_url = "https://raw.githubusercontent.com/kakuro83/BQ/3698fd9da17043e75779d8897fd0fe622229dfba/Estudiantes.txt"
