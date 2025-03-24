@@ -8,9 +8,13 @@ import io
 # Exportar cada hoja como CSV directamente desde el enlace público
 
 def cargar_csv_desde_google(url):
-    response = requests.get(url)
-    response.raise_for_status()  # Lanza error si falla
-    return pd.read_csv(io.StringIO(response.text)).dropna()
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Lanza error si falla
+        return pd.read_csv(io.StringIO(response.text)).dropna()
+    except requests.exceptions.HTTPError as e:
+        print(f"❌ Error al cargar CSV desde: {url}\n{e}")
+        return pd.DataFrame()
 
 # Enlaces actualizados a las hojas en formato CSV (usar enlaces confirmados públicamente)
 url_proteinas = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRcf1jOr-2yFpsVoAv2XD_qPMu2qjchHZnGgYZd1EEl2B8uK8ycoBa5q9oQlsJxAaO8_d1xydYrGQ3S/pub?gid=0&single=true&output=csv"
@@ -22,7 +26,7 @@ hoja_columnas = cargar_csv_desde_google(url_columnas)
 hoja_fijos = cargar_csv_desde_google(url_fijos)
 
 # Convertir a diccionario de parámetros
-parametros_fijos = dict(zip(hoja_fijos["Parámetro"], hoja_fijos["Valor"]))
+parametros_fijos = dict(zip(hoja_fijos["Parámetro"], hoja_fijos["Valor"])) if not hoja_fijos.empty else {}
 
 # --- 2. TXT de Estudiantes desde GitHub (público raw) ---
 estudiantes_url = "https://raw.githubusercontent.com/kakuro83/BQ/3698fd9da17043e75779d8897fd0fe622229dfba/Estudiantes.txt"
