@@ -1,103 +1,41 @@
-# 📥 Cromatografía.py - Bloque 1: Carga de datos desde Google Sheets (sin API externa), TXT y Excel (todo público)
+# Cromatografía.py – App para Olimpiada de Bioquímica
 
-import pandas as pd
-import requests
-import io
 import streamlit as st
+import pandas as pd
 
-st.title("📥 Carga de datos - Sistema de Cromatografía")
+# --- Título de la app ---
+st.set_page_config(page_title="Olimpiada de Bioquímica – Purificación de Proteínas")
+st.title("🏆 Olimpiada de Bioquímica – Estrategia de Purificación de Proteínas")
 
-# --- 1. Google Sheets (sin API externa, desde CSV export) ---
-def cargar_csv_desde_google(url):
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        return pd.read_csv(io.StringIO(response.text)).dropna(how="all")
-    except requests.exceptions.HTTPError as e:
-        st.error(f"❌ Error al cargar CSV desde: {url}\n{e}")
-        return pd.DataFrame()
+# --- Enlace a la hoja pública de Google Sheets ---
+url_hoja = "https://docs.google.com/spreadsheets/d/1Rqk1GZ3Y5KKNT5VjTXI-pbFhlVZ-c-XcCCjmXAM6DiQ/export?format=csv&id=1Rqk1GZ3Y5KKNT5VjTXI-pbFhlVZ-c-XcCCjmXAM6DiQ&gid="
 
-# ID real del documento compartido y GID de las hojas
-sheet_id = "1Rqk1GZ3Y5KKNT5VjTXI-pbFhlVZ-c-XcCCjmXAM6DiQ"
-url_proteinas = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid=0"
-url_columnas = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid=830674505"
-url_fijos = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid=1578172910"
+# Diccionario de pestañas (hojas) y sus IDs (gid)
+sheets = {
+    "Ejercicio": "0",
+    "Purificación": "1798027090",
+    "Datos": "1730716012"
+}
 
-hoja_proteinas = cargar_csv_desde_google(url_proteinas)
-hoja_columnas = cargar_csv_desde_google(url_columnas)
-hoja_fijos = cargar_csv_desde_google(url_fijos)
+# Función para cargar una hoja específica de la hoja de cálculo
+def cargar_hoja(gid):
+    enlace = url_hoja + gid
+    df = pd.read_csv(enlace)
+    return df
 
-# Depuración avanzada para hoja de datos fijos
-parametros_fijos = {}
-if not hoja_fijos.empty:
-    st.write("📋 Columnas detectadas en 'DatosFijos':", hoja_fijos.columns.tolist())
-    columnas = [col.strip().lower() for col in hoja_fijos.columns]
-    if "parámetro" in columnas and "valor" in columnas:
-        # Normalizar columnas
-        hoja_fijos.columns = [col.strip().capitalize() for col in hoja_fijos.columns]
-        parametros_fijos = dict(zip(hoja_fijos["Parámetro"], hoja_fijos["Valor"]))
-    else:
-        st.warning("⚠️ Las columnas esperadas 'Parámetro' y 'Valor' no están correctamente nombradas o formateadas.")
-        st.dataframe(hoja_fijos.head())
-else:
-    st.warning("⚠️ No se pudo cargar la hoja 'DatosFijos'.")
+# Cargar todas las hojas necesarias
+df_ejercicio = cargar_hoja(sheets["Ejercicio"])
+df_purificacion = cargar_hoja(sheets["Purificación"])
+df_datos = cargar_hoja(sheets["Datos"])
 
-# --- 2. TXT de Estudiantes desde GitHub ---
-estudiantes_url = "https://raw.githubusercontent.com/kakuro83/BQ/3698fd9da17043e75779d8897fd0fe622229dfba/Estudiantes.txt"
-lista_estudiantes = pd.read_csv(estudiantes_url, header=None)[0].dropna().tolist()
+# Mostrar vista previa de los datos
+st.subheader("🧪 Proteína Objetivo y Condiciones Iniciales")
+st.dataframe(df_ejercicio)
 
-# --- 3. Excel para registro de respuestas desde GitHub ---
-url_excel = "https://raw.githubusercontent.com/kakuro83/BQ/3698fd9da17043e75779d8897fd0fe622229dfba/Respuestas.xlsx"
-try:
-    import openpyxl
-    response = requests.get(url_excel)
-    df_respuestas = pd.read_excel(io.BytesIO(response.content), engine="openpyxl")
-except ImportError:
-    st.warning("⚠️ Falta el paquete 'openpyxl'. Agrega 'openpyxl' en requirements.txt para leer archivos Excel.")
-    df_respuestas = pd.DataFrame()
+st.subheader("🧬 Columnas de Purificación Disponibles")
+st.dataframe(df_purificacion)
 
-# Verificación visual en Streamlit
-st.success("✅ Datos cargados correctamente (sin APIs externas):")
-st.markdown(f"- **Proteínas:** {len(hoja_proteinas)} entradas")
-st.markdown(f"- **Columnas:** {len(hoja_columnas)} técnicas")
-st.markdown(f"- **Parámetros fijos:** {len(parametros_fijos)}")
-st.markdown(f"- **Estudiantes:** {len(lista_estudiantes)}")
-st.markdown(f"- **Respuestas cargadas:** {df_respuestas.shape[0]} filas")
+st.subheader("📊 Parámetros Globales del Sistema")
+st.dataframe(df_datos)
 
-# Mensajes de ayuda en caso de error
-if hoja_proteinas.empty:
-    st.error("❌ No se cargaron datos de proteínas.")
-
-if hoja_columnas.empty:
-    st.error("❌ No se cargaron datos de columnas de purificación.")
-
-if not parametros_fijos:
-    st.warning("⚠️ No se cargaron los parámetros fijos correctamente.")
-
-if not lista_estudiantes:
-    st.warning("⚠️ No se cargó la lista de estudiantes.")
-
-if df_respuestas.empty:
-    st.info("ℹ️ No hay respuestas registradas aún.")
-
-# Mostrar ejemplos
-with st.expander("👁 Ver muestra de las tablas cargadas"):
-    if not hoja_proteinas.empty:
-        st.subheader("🔬 Proteínas")
-        st.dataframe(hoja_proteinas.head())
-
-    if not hoja_columnas.empty:
-        st.subheader("🧪 Columnas de purificación")
-        st.dataframe(hoja_columnas.head())
-
-    if parametros_fijos:
-        st.subheader("⚙️ Parámetros fijos")
-        st.dataframe(pd.DataFrame(parametros_fijos.items(), columns=["Parámetro", "Valor"]))
-
-    if lista_estudiantes:
-        st.subheader("👤 Lista de estudiantes")
-        st.write(lista_estudiantes[:5])
-
-    if not df_respuestas.empty:
-        st.subheader("📄 Respuestas registradas")
-        st.dataframe(df_respuestas.head())
+st.info("Esta es la vista base de los datos. A partir de aquí construiremos la lógica para diseñar la estrategia de purificación.")
