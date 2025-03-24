@@ -26,24 +26,26 @@ def cargar_hoja(nombre, gid):
         st.error(f"❌ Error al cargar la hoja '{nombre}': {e}")
         return pd.DataFrame()
 
-# Función para cargar una hoja de un archivo Excel en GitHub
+# Función para cargar un CSV desde GitHub
 @st.cache_data
-def cargar_excel_desde_github(url_raw, hoja):
+def cargar_csv_desde_github(url_raw, nombre):
     try:
-        df = pd.read_excel(url_raw, sheet_name=hoja)
-        st.success(f"✅ Hoja '{hoja}' cargada correctamente desde GitHub.")
+        df = pd.read_csv(url_raw)
+        st.success(f"✅ Hoja '{nombre}' cargada correctamente desde GitHub.")
         return df
     except Exception as e:
-        st.error(f"❌ Error al cargar la hoja '{hoja}': {e}")
+        st.error(f"❌ Error al cargar la hoja '{nombre}': {e}")
         return pd.DataFrame()
 
 # --- Cargar hoja 'Ejercicio' desde Google Sheets ---
 df_ejercicio = cargar_hoja("Ejercicio", sheets["Ejercicio"])
 
-# --- Cargar hojas 'Purificación' y 'Datos' desde Excel en GitHub ---
-url_excel_raw = "https://raw.githubusercontent.com/kakuro83/BQ/58aa1d98fda8f2871d81223c74f8d3dcdbbea9e1/Fijos.xlsx"
-df_purificacion = cargar_excel_desde_github(url_excel_raw, "Purificación")
-df_datos = cargar_excel_desde_github(url_excel_raw, "Datos")
+# --- Cargar hojas 'Purificación' y 'Datos' desde CSV en GitHub ---
+url_purificacion = "https://raw.githubusercontent.com/kakuro83/BQ/07db0129a42190db7c548d2be1e7939e24e06833/Purificaci%C3%B3n.csv"
+url_datos = "https://raw.githubusercontent.com/kakuro83/BQ/07db0129a42190db7c548d2be1e7939e24e06833/Datos.csv"
+
+df_purificacion = cargar_csv_desde_github(url_purificacion, "Purificación")
+df_datos = cargar_csv_desde_github(url_datos, "Datos")
 
 # --- Mostrar vista previa si se cargaron correctamente ---
 if not df_ejercicio.empty:
