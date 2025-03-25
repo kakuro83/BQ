@@ -158,6 +158,17 @@ if not hoja_ejercicio.empty:
                     mensaje_validacion = "❌ La proteína no tiene etiqueta His-tag requerida."
                 elif "lectina" in tecnica.lower() and "Glicoproteína" not in etiquetas:
                     mensaje_validacion = "❌ La proteína no es una glicoproteína, no puede usarse afinidad por lectina."
+                elif tecnica == "SEC":
+                    try:
+                        recorrido_obj = float(objetivo["Recorrido"].values[0])
+                        log_mr = 2.2 - 0.015 * recorrido_obj
+                        mr_estimado = 10 ** log_mr
+                        mr_proteina = float(df_proteina["Mr (kDa)"].values[0])
+                        if mr_proteina > mr_estimado:
+                            mensaje_validacion = f"❌ La proteína ({mr_proteina:.1f} kDa) es demasiado grande para SEC (límite ≈ {mr_estimado:.1f} kDa)."
+                    except:
+                        mensaje_validacion = "⚠️ No se pudo calcular el límite de SEC por recorrido."
+
                 if mensaje_validacion:
                     st.warning(mensaje_validacion)
                 params = df_purificacion[df_purificacion["Técnica"] == tecnica].iloc[0]
