@@ -13,14 +13,16 @@ def factor_saturacion(carga, capacidad_columna):
 def recuperacion_proteina(recuperacion_pct, fs, mezcla_mg, pureza_in):
     """
     Calcula la recuperación de la proteína objetivo (en mg) después de una etapa.
+    Si Fs > 1 se aplica corrección. Si Fs ≤ 1 se usa directamente la recuperación base.
     Limita el valor a no superar la mezcla total.
     """
-    if fs == 0:
-        return 0
     rb = recuperacion_pct / 100
     pi = pureza_in / 100
-    r = (rb / fs) * mezcla_mg * pi
-    return min(r, mezcla_mg)
+    if fs > 1:
+        r = (rb / fs) * mezcla_mg * pi
+    else:
+        r = rb * mezcla_mg * pi
+    #return min(r, mezcla_mg)
 
 def calcular_pureza(v, pb, vmax, pmax, pin):
     if vmax == 0:
