@@ -13,6 +13,8 @@ from ecuaciones import (
     calcular_rentabilidad
 )
 
+st.write("🧪 Función de carga:", carga_por_corrida(1000, 4))
+
 # --- Título de la app ---
 st.set_page_config(page_title="Olimpiada de Bioquímica – Purificación de Proteínas")
 
