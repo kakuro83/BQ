@@ -121,22 +121,22 @@ if proteina_seleccionada != "Seleccionar proteína":
 # Bloque de estrategia: diseño de hasta 4 etapas
     st.header("⚗️ Estrategia de Purificación")
 
-    # Obtener abundancia desde SDS-PAGE
+    # Obtener información de la proteína objetivo desde SDS-PAGE
     objetivo = df_bandas[df_bandas["Propiedad estructural"].str.lower() == "objetivo"]
     if not objetivo.empty:
         abundancia_objetivo = float(objetivo["Abundancia (%)"].values[0])
+        carga_objetivo = int(objetivo["Carga neta"].values[0])
+        recorrido_objetivo = float(objetivo["Recorrido"].values[0])
+        etiquetas_objetivo = df_proteina["Etiquetas"].values[0].lower()
     else:
         st.error("❌ No se encontró la banda con 'Objetivo' en el análisis SDS-PAGE.")
         st.stop()
 
     pureza_inicial = abundancia_objetivo
     recuperacion = float(df_proteina["Cantidad (mg)"].values[0])
-
-    # Inicializar acumuladores
     costos_acumulados = 0
     tiempo_total_h = 0
 
-    # Lista de técnicas disponibles
     opciones_tecnicas = ["Seleccionar"] + df_purificacion["Técnica"].dropna().tolist()
 
     for i in range(1, 5):
@@ -156,26 +156,45 @@ if proteina_seleccionada != "Seleccionar proteína":
                 vmax = float(fila["Velocidad media (mg/min)"].values[0])
                 pmax = float(fila["Pureza máxima (%)"].values[0])
 
+                # Validaciones de uso correcto
+                advertencia = ""
+                tecnica_lower = tecnica.lower()
+                if "intercambio catiónico" in tecnica_lower and carga_objetivo < 1:
+                    advertencia = "⚠️ CIEX solo retiene proteínas con carga neta ≥ +1."
+                elif "intercambio aniónico" in tecnica_lower and carga_objetivo > -1:
+                    advertencia = "⚠️ AIEX solo retiene proteínas con carga neta ≤ -1."
+                elif "his-tag" in tecnica_lower and "his-tag" not in etiquetas_objetivo:
+                    advertencia = "⚠️ Se requiere la etiqueta 'His-tag' para esta columna."
+                elif "lectina" in tecnica_lower and "glicoproteína" not in etiquetas_objetivo:
+                    advertencia = "⚠️ Se requiere que la proteína sea una glicoproteína."
+                elif "tamaño" in tecnica_lower:
+                    mr_objetivo = 10 ** (2.2 - 0.015 * recorrido_objetivo)
+                    if mr_objetivo > 60:
+                        advertencia = f"⚠️ Mr estimado: {mr_objetivo:.1f} kDa. SEC solo permite proteínas ≤ 60 kDa."
+
+                if advertencia:
+                    st.warning(advertencia)
+
                 cantidad_mezcla = recuperacion
                 carga = carga_por_corrida(cantidad_mezcla, corridas)
                 fs = factor_saturacion(carga, capacidad)
 
-                # Calcular recuperación
+                # Cálculo de recuperación
                 if fs > 1:
                     recuperacion = recuperacion_proteina(recuperacion_pct, fs, cantidad_mezcla, abundancia_objetivo)
                 else:
                     recuperacion = (recuperacion_pct / 100) * cantidad_mezcla * (abundancia_objetivo / 100)
 
-                # Calcular pureza
+                # Cálculo de pureza
                 pureza_estim = calcular_pureza(velocidad, pureza_base, vmax, pmax, pureza_inicial)
                 pureza_corr = ajustar_pureza_por_selectividad(tecnica, pureza_estim, df_bandas)
 
-                # Calcular tiempo y costo
+                # Tiempo y costo
                 tiempo_min = calcular_tiempo(carga, velocidad, corridas)
                 tiempo_h = tiempo_min / 60
                 costo_total = calcular_costo(costo_columna, corridas)
 
-                # Acumuladores globales
+                # Acumuladores
                 costos_acumulados += costo_total
                 tiempo_total_h += tiempo_h
 
@@ -185,5 +204,4 @@ if proteina_seleccionada != "Seleccionar proteína":
                 st.warning(f"⏱️ Tiempo estimado: `{tiempo_h:.2f}` h")
                 st.markdown(f"💲 Costo total etapa: `{costo_total:.2f} USD`")
 
-                # Actualizar pureza para siguiente etapa
                 pureza_inicial = pureza_corr
