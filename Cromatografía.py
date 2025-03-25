@@ -155,26 +155,22 @@ if not hoja_ejercicio.empty:
                     carga_proteina = 0
                 etiquetas = str(df_proteina["Etiquetas"].values[0])
 
-                if tecnica == "CIEX" and carga_proteina < 1:
+                if tecnica == "Intercambio catiónico (CIEX)" and carga_proteina < 1:
                     mensaje_validacion = "❌ La proteína no tiene carga positiva suficiente para CIEX."
-                elif tecnica == "AIEX" and carga_proteina > -1:
+                elif tecnica == "Intercambio aniónico (AIEX)" and carga_proteina > -1:
                     mensaje_validacion = "❌ La proteína no tiene carga negativa suficiente para AIEX."
                 elif "His-tag" in tecnica and "His-tag" not in etiquetas:
                     mensaje_validacion = "❌ La proteína no tiene etiqueta His-tag requerida."
                 elif "lectina" in tecnica.lower() and "Glicoproteína" not in etiquetas:
                     mensaje_validacion = "❌ La proteína no es una glicoproteína, no puede usarse afinidad por lectina."
-                elif tecnica == "SEC":
+                elif tecnica == "Cromatografía por tamaño (SEC)":
                     try:
                         recorrido_obj = float(objetivo["Recorrido"].values[0])
+                        mr_estimado = 60
                         log_mr_obj = 2.2 - 0.015 * recorrido_obj
                         mr_objetivo = 10 ** log_mr_obj
-                        mr_max_sec = 60  # límite fijo de paso para SEC
-                
                         st.text(f"Mr objetivo calculado: {mr_objetivo:.1f} kDa")
-                        st.text(f"Límite máximo SEC: {mr_max_sec:.1f} kDa")
-                
-                        if mr_objetivo > mr_max_sec:
-                            mensaje_validacion = f"❌ La proteína ({mr_objetivo:.1f} kDa) es demasiado grande para SEC (límite ≈ {mr_max_sec:.1f} kDa)."
-                    except:
-                        mensaje_validacion = "⚠️ No se pudo calcular el peso molecular estimado para SEC."
-
+                        st.text(f"Límite estimado SEC: {mr_estimado:.1f} kDa")
+                        if mr_objetivo > mr_estimado:
+                            st.text(f"Mr objetivo: {mr_objetivo:.1f} kDa vs límite SEC: {mr_estimado:.1f} kDa")
+                            mensaje_validacion = f"❌ La proteína ({mr_objetivo:.1f} kDa) es demasiado grande para SEC (límite ≈ {mr_estimado:.1f} kDa)."
