@@ -207,7 +207,7 @@ for i in range(1, 5):
                 pureza_inicial = pureza_corr
 
         # BLOQUE FINAL: GANANCIA Y RENTABILIDAD
-        st.subheader("💰 Resultados Finales del Proceso")
+st.subheader("💰 Resultados Finales del Proceso")
         st.markdown("Estos valores consideran únicamente la última etapa procesada:")
 
         # Obtener valor comercial desde df_datos según pureza alcanzada
