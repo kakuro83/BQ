@@ -145,6 +145,21 @@ if not hoja_ejercicio.empty:
                 velocidad = st.number_input(f"Velocidad (mg/min) {i}", min_value=0.1, step=0.1, key=f"velocidad_{i}")
 
             if tecnica != "Seleccionar":
+                # Validación de condiciones de uso de columna
+                mensaje_validacion = ""
+                carga_proteina = int(df_proteina["Carga"].values[0])
+                etiquetas = str(df_proteina["Etiquetas"].values[0])
+
+                if tecnica == "CIEX" and carga_proteina < 1:
+                    mensaje_validacion = "❌ La proteína no tiene carga positiva suficiente para CIEX."
+                elif tecnica == "AIEX" and carga_proteina > -1:
+                    mensaje_validacion = "❌ La proteína no tiene carga negativa suficiente para AIEX."
+                elif "His-tag" in tecnica and "His-tag" not in etiquetas:
+                    mensaje_validacion = "❌ La proteína no tiene etiqueta His-tag requerida."
+                elif "lectina" in tecnica.lower() and "Glicoproteína" not in etiquetas:
+                    mensaje_validacion = "❌ La proteína no es una glicoproteína, no puede usarse afinidad por lectina."
+                if mensaje_validacion:
+                    st.warning(mensaje_validacion)
                 params = df_purificacion[df_purificacion["Técnica"] == tecnica].iloc[0]
                 capacidad = float(params["Capacidad (mg)"])
                 costo_columna = float(params["Costo (USD)"])
