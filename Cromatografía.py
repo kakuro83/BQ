@@ -21,22 +21,22 @@ sheets = {"Ejercicio": "0"}
 
 # Funciones auxiliares de carga
 def cargar_hoja(nombre, gid):
-    try:
-        enlace = url_hoja + gid
-        df = pd.read_csv(enlace)
-        st.success(f"✅ Hoja '{nombre}' cargada correctamente desde Google Sheets.")
-        return df
-    except Exception as e:
+try:
+    enlace = url_hoja + gid
+    df = pd.read_csv(enlace)
+    st.success(f"✅ Hoja '{nombre}' cargada correctamente desde Google Sheets.")
+    return df
+except:
         st.error(f"❌ Error al cargar la hoja '{nombre}': {e}")
         return pd.DataFrame()
 
 @st.cache_data
 def cargar_csv_desde_github(url_raw, nombre, header='infer', names=None):
-    try:
-        df = pd.read_csv(url_raw, header=header, names=names)
-        st.success(f"✅ Hoja '{nombre}' cargada correctamente desde GitHub.")
-        return df
-    except Exception as e:
+try:
+    df = pd.read_csv(url_raw, header=header, names=names)
+    st.success(f"✅ Hoja '{nombre}' cargada correctamente desde GitHub.")
+    return df
+except:
         st.error(f"❌ Error al cargar la hoja '{nombre}': {e}")
         return pd.DataFrame()
 
@@ -46,9 +46,9 @@ def ajustar_pureza_por_selectividad(tecnica, pureza_estim, df_bandas):
     if objetivo.empty:
         return pureza_estim
 
-    try:
-        abundancia_obj = float(objetivo["Abundancia (%)"].values[0])
-    except:
+try:
+    abundancia_obj = float(objetivo["Abundancia (%)"].values[0])
+except:
         return pureza_estim
 
     if "CIEX" in tecnica:
@@ -57,9 +57,9 @@ def ajustar_pureza_por_selectividad(tecnica, pureza_estim, df_bandas):
         retenidas = df_bandas[df_bandas["Carga neta"].astype(int) <= -1]
     elif "SEC" in tecnica:
         def calcular_mr(recorrido):
-            try:
-                return 10 ** (2.2 - 0.015 * float(recorrido))
-            except:
+try:
+    return 10 ** (2.2 - 0.015 * float(recorrido))
+except:
                 return float('inf')
         df_bandas["Mr"] = df_bandas["Recorrido"].apply(calcular_mr)
         retenidas = df_bandas[df_bandas["Mr"] <= 60]
@@ -142,9 +142,9 @@ if not hoja_ejercicio.empty:
         pureza_inicial = abundancia_objetivo
         etiquetas = str(df_proteina["Etiquetas"].values[0])
         carga_texto = str(df_proteina["Carga"].values[0]).strip().replace(',', '.')
-        try:
-            carga_proteina = int(carga_texto)
-        except:
+try:
+    carga_proteina = int(carga_texto)
+except:
             carga_proteina = 0
 
 costos_acumulados = 0
@@ -205,3 +205,43 @@ for i in range(1, 5):
 
                 cantidad_mezcla = recuperacion
                 pureza_inicial = pureza_corr
+
+        # BLOQUE FINAL: GANANCIA Y RENTABILIDAD
+st.subheader("💰 Resultados Finales del Proceso")
+st.markdown("Estos valores consideran únicamente la última etapa procesada:")
+
+# Obtener valor comercial desde df_datos según pureza alcanzada
+valor_comercial = 0
+try:
+    niveles = [1, 2, 3, 4]
+    for nivel in niveles:
+    pureza_min = float(df_datos[df_datos["Parametro"] == f"Pureza mínima nivel {nivel} (%)"]["Valor"].values[0])
+    precio = float(df_datos[df_datos["Parametro"] == f"Valor comercial nivel {nivel} (USD)"]["Valor"].values[0])
+    if pureza_corr >= pureza_min:
+    valor_comercial = precio
+except:
+valor_comercial = 0
+
+# Costo fijo operativo
+try:
+    costo_fijo_hora = float(df_datos[df_datos["Parametro"] == "Costos fijos operativos (USD/h)"].iloc[0]["Valor"])
+except:
+costo_fijo_hora = 0
+
+# Sumar tiempos y costos acumulados
+tiempo_total_h = sum([calcular_tiempo(carga_por_corrida(float(df_proteina["Cantidad (mg)"].values[0]) if i == 1 else 0, 1), velocidad, 1)/60 for i in range(1, 5)])
+costo_total_final = costos_acumulados  # Debería acumular los costos reales si se ajusta etapa por etapa
+
+# Ganancia y rentabilidad
+ganancia_neta = calcular_ganancia_neta(recuperacion, valor_comercial, costo_total_final, costo_fijo_hora, tiempo_total_h)
+rentabilidad = calcular_rentabilidad(ganancia_neta, tiempo_h)
+
+st.markdown("---")
+st.markdown("### 💼 Resumen Final")
+st.markdown(f"- 🧪 Recuperación final: `{recuperacion:.1f}` mg")
+st.markdown(f"- 🎯 Pureza final alcanzada: `{pureza_corr:.1f}` %")
+st.markdown(f"- ⏱️ Tiempo total: `{tiempo_total_h:.2f}` h")
+st.markdown(f"- 💲 Costo total (USD): `{costos_acumulados:.2f}`")
+st.markdown(f"- 💵 Valor comercial aplicado: `${valor_comercial:.2f}` por mg")
+st.markdown(f"- 📈 Ganancia neta: `${ganancia_neta:.2f}`")
+st.markdown(f"- 📊 Rentabilidad: `{rentabilidad:.2f} USD/h`")
