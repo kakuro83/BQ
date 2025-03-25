@@ -124,4 +124,78 @@ if not hoja_ejercicio.empty:
         df_bandas = pd.DataFrame(bandas)
         st.dataframe(df_bandas)
 
-        st.info("Esta es la vista base de los datos. A partir de aquí construiremos la lógica para diseñar la estrategia de purificación.")
+        # Bloque: Estrategia de Purificación por Etapas
+        st.subheader("⚗️ Estrategia de Purificación")
+        tecnicas = df_purificacion["Técnica"].dropna().unique().tolist()
+
+        objetivo = df_bandas[df_bandas["Propiedad estructural"].str.lower() == "objetivo"]
+        abundancia_objetivo = float(objetivo["Abundancia (%)"].values[0]) if not objetivo.empty else 0
+        recorrido_obj = float(objetivo["Recorrido"].values[0]) if not objetivo.empty else 0
+
+        log_mr_obj = 2.2 - 0.015 * recorrido_obj
+        mr_objetivo = 10 ** log_mr_obj
+        cantidad_mezcla = float(df_proteina["Cantidad (mg)"].values[0])
+        pureza_inicial = abundancia_objetivo
+        etiquetas = str(df_proteina["Etiquetas"].values[0])
+        carga_texto = str(df_proteina["Carga"].values[0]).strip().replace(',', '.')
+        try:
+            carga_proteina = int(carga_texto)
+        except:
+            carga_proteina = 0
+
+        for i in range(1, 5):
+            st.markdown(f"**Etapa {i}**")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                tecnica = st.selectbox(f"Técnica {i}", ["Seleccionar"] + tecnicas, key=f"tecnica_{i}")
+            with col2:
+                corridas = st.number_input(f"Corridas {i}", min_value=1, step=1, key=f"corridas_{i}")
+            with col3:
+                velocidad = st.number_input(f"Velocidad (mg/min) {i}", min_value=0.1, step=0.1, key=f"velocidad_{i}")
+
+            if tecnica != "Seleccionar":
+                mensaje_validacion = ""
+                if tecnica == "Intercambio catiónico (CIEX)" and carga_proteina < 1:
+                    mensaje_validacion = "❌ La proteína no tiene carga positiva suficiente para CIEX."
+                elif tecnica == "Intercambio aniónico (AIEX)" and carga_proteina > -1:
+                    mensaje_validacion = "❌ La proteína no tiene carga negativa suficiente para AIEX."
+                elif "His-tag" in tecnica and "His-tag" not in etiquetas:
+                    mensaje_validacion = "❌ La proteína no tiene etiqueta His-tag requerida."
+                elif "lectina" in tecnica.lower() and "Glicoproteína" not in etiquetas:
+                    mensaje_validacion = "❌ La proteína no es una glicoproteína, no puede usarse afinidad por lectina."
+                elif tecnica == "Cromatografía por tamaño (SEC)":
+                    mr_estimado = 60  # valor límite SEC
+                    st.text(f"Mr objetivo calculado: {mr_objetivo:.1f} kDa")
+                    st.text(f"Límite máximo SEC: {mr_estimado:.1f} kDa")
+                    if mr_objetivo > mr_estimado:
+                        mensaje_validacion = f"❌ La proteína ({mr_objetivo:.1f} kDa) es demasiado grande para SEC (límite ≈ {mr_estimado:.1f} kDa)."
+                if mensaje_validacion:
+                    st.warning(mensaje_validacion)
+
+                params = df_purificacion[df_purificacion["Técnica"] == tecnica].iloc[0]
+                capacidad = float(params["Capacidad (mg)"])
+                costo_columna = float(params["Costo (USD)"])
+                recuperacion_pct = float(params["Recuperación (%)"])
+                pureza_base = float(params["Pureza base (%)"])
+                vmax = float(params["Velocidad media (mg/min)"])
+                pmax = float(params["Pureza máxima (%)"])
+
+                carga = carga_por_corrida(cantidad_mezcla, corridas)
+                fs = factor_saturacion(carga, capacidad)
+                recuperacion = recuperacion_proteina(recuperacion_pct, fs, cantidad_mezcla, abundancia_objetivo)
+                pureza_estim = calcular_pureza(velocidad, pureza_base, vmax, pmax, pureza_inicial)
+                pureza_corr = ajustar_pureza_por_selectividad(tecnica, pureza_estim, df_bandas)
+                tiempo_min = calcular_tiempo(carga, velocidad, corridas)
+                tiempo_h = tiempo_min / 60
+                costo_total = calcular_costo(costo_columna, corridas)
+
+                st.markdown(f"✅ **Resultados Etapa {i}:**")
+                st.markdown(f"- Carga por corrida: `{carga:.1f}` mg")
+                st.markdown(f"- Factor de saturación: `{fs:.2f}`")
+                st.markdown(f"- Recuperación: `{recuperacion:.1f}` mg")
+                st.markdown(f"- Pureza estimada: `{pureza_estim:.1f}` %, ajustada: `{pureza_corr:.1f}` %")
+                st.markdown(f"- Tiempo: `{tiempo_h:.2f}` h")
+                st.markdown(f"- Costo: `${costo_total:.2f}`")
+
+                cantidad_mezcla = recuperacion
+                pureza_inicial = pureza_corr
