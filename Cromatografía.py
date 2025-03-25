@@ -18,7 +18,6 @@ st.set_page_config(page_title="Olimpiada de Bioquímica – Purificación de Pro
 st.title("🏆 Olimpiada de Bioquímica – Estrategia de Purificación de Proteínas")
 
 url_hoja = "https://docs.google.com/spreadsheets/d/1Rqk1GZ3Y5KKNT5VjTXI-pbFhlVZ-c-XcCCjmXAM6DiQ/export?format=csv&gid="
-
 sheets = {"Ejercicio": "0"}
 
 def cargar_hoja(nombre, gid):
@@ -55,7 +54,6 @@ def obtener_valor_comercial(pureza_final, df_datos):
     return 0
 
 # Función para ajustar la pureza en columnas CIEX o AIEX considerando otras proteínas
-
 def ajustar_pureza_por_selectividad(tecnica, pureza_estim, df_bandas):
     if tecnica not in ["CIEX", "AIEX"]:
         return pureza_estim
@@ -81,7 +79,7 @@ def ajustar_pureza_por_selectividad(tecnica, pureza_estim, df_bandas):
     pureza_corr = (abundancia_obj / suma_abundancias) * pureza_estim
     return round(pureza_corr, 2)
 
-# Resto del código sin cambios...
+# 🔜 Aquí vendrán los bloques para cargar y mostrar las hojas: Ejercicio, Purificación, Datos, Estudiantes
+# Y luego los bloques interactivos con selección de estudiante, proteína y cálculo por etapas
 
-# Al final:
 st.info("Esta es la vista base de los datos. A partir de aquí construiremos la lógica para diseñar la estrategia de purificación.")
