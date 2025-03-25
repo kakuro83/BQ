@@ -10,10 +10,17 @@ def factor_saturacion(carga, capacidad_columna):
         return 0
     return carga / capacidad_columna
 
-def recuperacion_proteina(recuperacion_columna_pct, fs, mmg, abundancia_pct):
-    if fs == 0:
-        return 0
-    return (recuperacion_columna_pct / fs) * mmg * (abundancia_pct / 100)
+def recuperacion_proteina(recuperacion_pct, fs, mezcla_mg, pureza_in):
+    """
+    Calcula la recuperación de la proteína objetivo (en mg) después de una etapa.
+    - recuperacion_pct: recuperación base de la columna (%)
+    - fs: factor de saturación
+    - mezcla_mg: cantidad total de mezcla (mg)
+    - pureza_in: pureza de entrada (%) de la proteína objetivo
+    """
+    rb = recuperacion_pct / 100
+    pi = pureza_in / 100
+    return (rb / fs) * mezcla_mg * pi
 
 def calcular_pureza(v, pb, vmax, pmax, pin):
     if vmax == 0:
