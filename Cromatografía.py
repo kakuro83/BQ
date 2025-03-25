@@ -239,7 +239,7 @@ if not hoja_ejercicio.empty:
         st.markdown(f"- 🧪 Recuperación final: `{recuperacion:.1f}` mg")
         st.markdown(f"- 🎯 Pureza final alcanzada: `{pureza_corr:.1f}` %")
         st.markdown(f"- ⏱️ Tiempo total: `{tiempo_total_h:.2f}` h")
-        st.markdown(f"- 💲 Costo total (USD): `{costo_total:.2f}`")
+        st.markdown(f"- 💲 Costo total (USD): `{costos_acumulados:.2f}`")
         st.markdown(f"- 💵 Valor comercial aplicado: `${valor_comercial:.2f}` por mg")
         st.markdown(f"- 📈 Ganancia neta: `${ganancia_neta:.2f}`")
         st.markdown(f"- 📊 Rentabilidad: `{rentabilidad:.2f} USD/h`")
