@@ -170,9 +170,11 @@ if not hoja_ejercicio.empty:
                         mr_estimado = 10 ** log_mr
                         log_mr_obj = 2.2 - 0.015 * recorrido_obj
                         mr_objetivo = 10 ** log_mr_obj
+                        st.text(f"Mr objetivo calculado: {mr_objetivo:.1f} kDa")
+                        st.text(f"Límite estimado SEC: {mr_estimado:.1f} kDa")
                         if mr_objetivo > mr_estimado:
                             st.text(f"Mr objetivo: {mr_objetivo:.1f} kDa vs límite SEC: {mr_estimado:.1f} kDa")
-                            mensaje_validacion = f"❌ La proteína ({mr_proteina:.1f} kDa) es demasiado grande para SEC (límite ≈ {mr_estimado:.1f} kDa)."
+                            mensaje_validacion = f"❌ La proteína ({mr_objetivo:.1f} kDa) es demasiado grande para SEC (límite ≈ {mr_estimado:.1f} kDa)." kDa) es demasiado grande para SEC (límite ≈ {mr_estimado:.1f} kDa)."
                     except:
                         mensaje_validacion = "⚠️ No se pudo calcular el límite de SEC por recorrido."
 
