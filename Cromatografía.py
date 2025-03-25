@@ -1,247 +1,50 @@
-# Cromatografía.py – App para Olimpiada de Bioquímica
+# ecuaciones.py – Funciones para cálculos de purificación
 
-import streamlit as st
-import pandas as pd
-from ecuaciones import (
-    carga_por_corrida,
-    factor_saturacion,
-    recuperacion_proteina,
-    calcular_pureza,
-    calcular_tiempo,
-    calcular_costo,
-    calcular_ganancia_neta,
-    calcular_rentabilidad
-)
+def carga_por_corrida(mmg, corridas):
+    if corridas == 0:
+        return 0
+    return mmg / corridas
 
-st.set_page_config(page_title="Olimpiada de Bioquímica – Purificación de Proteínas")
-st.title("🏆 Olimpiada de Bioquímica – Estrategia de Purificación de Proteínas")
+def factor_saturacion(carga, capacidad_columna):
+    if capacidad_columna == 0:
+        return 0
+    return carga / capacidad_columna
 
-url_hoja = "https://docs.google.com/spreadsheets/d/1Rqk1GZ3Y5KKNT5VjTXI-pbFhlVZ-c-XcCCjmXAM6DiQ/export?format=csv&gid="
-sheets = {"Ejercicio": "0"}
-
-# Funciones auxiliares de carga
-def cargar_hoja(nombre, gid):
-    try:
-        enlace = url_hoja + gid
-        df = pd.read_csv(enlace)
-        st.success(f"✅ Hoja '{nombre}' cargada correctamente desde Google Sheets.")
-        return df
-    except Exception as e:
-        st.error(f"❌ Error al cargar la hoja '{nombre}': {e}")
-        return pd.DataFrame()
-
-@st.cache_data
-def cargar_csv_desde_github(url_raw, nombre, header='infer', names=None):
-    try:
-        df = pd.read_csv(url_raw, header=header, names=names)
-        st.success(f"✅ Hoja '{nombre}' cargada correctamente desde GitHub.")
-        return df
-    except Exception as e:
-        st.error(f"❌ Error al cargar la hoja '{nombre}': {e}")
-        return pd.DataFrame()
-
-# Función para ajustar la pureza en columnas CIEX o AIEX considerando otras proteínas
-def ajustar_pureza_por_selectividad(tecnica, pureza_estim, df_bandas):
-    objetivo = df_bandas[df_bandas["Propiedad estructural"].str.lower() == "objetivo"]
-    if objetivo.empty:
-        return pureza_estim
-
-    try:
-        abundancia_obj = float(objetivo["Abundancia (%)"].values[0])
-    except:
-        return pureza_estim
-
-    if "CIEX" in tecnica:
-        retenidas = df_bandas[df_bandas["Carga neta"].astype(int) >= 1]
-    elif "AIEX" in tecnica:
-        retenidas = df_bandas[df_bandas["Carga neta"].astype(int) <= -1]
-    elif "SEC" in tecnica:
-        def calcular_mr(recorrido):
-            try:
-                return 10 ** (2.2 - 0.015 * float(recorrido))
-            except:
-                return float('inf')
-        df_bandas["Mr"] = df_bandas["Recorrido"].apply(calcular_mr)
-        retenidas = df_bandas[df_bandas["Mr"] <= 60]
+def recuperacion_proteina(recuperacion_pct, fs, mezcla_mg, pureza_in):
+    """
+    Calcula la recuperación de la proteína objetivo (en mg) después de una etapa.
+    Si Fs > 1 se aplica corrección. Si Fs ≤ 1 se usa directamente la recuperación base.
+    Limita el valor a no superar la mezcla total.
+    """
+    rb = recuperacion_pct / 100
+    pi = pureza_in / 100
+    if fs > 1:
+        r = (rb / fs) * mezcla_mg * pi
     else:
-        return pureza_estim
+        r = rb * mezcla_mg * pi
+    return min(r, mezcla_mg)
 
-    suma_abundancias = retenidas["Abundancia (%)"].astype(float).sum()
-    if suma_abundancias == 0:
-        return pureza_estim
+def calcular_pureza(v, pb, vmax, pmax, pin):
+    if vmax == 0:
+        return pb
+    if v < vmax:
+        p = pb + (pmax - pb) * (1 - v / vmax)
+    else:
+        p = pb - (pb - pin) * ((v - vmax) / vmax)
+    return max(min(p, pmax), pin)
 
-    pureza_corr = (abundancia_obj / suma_abundancias) * pureza_estim
-    return round(pureza_corr, 2)
+def calcular_tiempo(carga, velocidad, corridas):
+    if velocidad == 0:
+        return 0
+    return (carga / velocidad) * corridas
 
-# Carga de hojas desde GitHub
-url_purificacion = "https://raw.githubusercontent.com/kakuro83/BQ/main/Purificaci%C3%B3n.csv"
-url_datos = "https://raw.githubusercontent.com/kakuro83/BQ/main/Datos.csv"
-url_estudiantes = "https://raw.githubusercontent.com/kakuro83/BQ/main/Estudiantes.txt"
+def calcular_costo(costo_columna, corridas):
+    return costo_columna * corridas
 
-hoja_ejercicio = cargar_hoja("Ejercicio", sheets["Ejercicio"])
-df_purificacion = cargar_csv_desde_github(url_purificacion, "Purificación")
-df_datos = cargar_csv_desde_github(url_datos, "Datos")
-df_estudiantes = cargar_csv_desde_github(url_estudiantes, "Estudiantes", header=None, names=["Estudiante"])
+def calcular_ganancia_neta(recuperacion_final_mg, valor_unitario_usd_mg, costo_columnas_usd, costo_operativo_usd_h, tiempo_total_h):
+    return (recuperacion_final_mg * valor_unitario_usd_mg) - costo_columnas_usd - (costo_operativo_usd_h * tiempo_total_h)
 
-# Mostrar datos fijos
-if not df_datos.empty:
-    st.subheader("📊 Datos Fijos")
-    st.dataframe(df_datos)
-
-if not df_purificacion.empty:
-    st.subheader("🧬 Información de las Columnas de Purificación")
-    st.dataframe(df_purificacion)
-
-if not df_estudiantes.empty:
-    st.subheader("👤 Selección de Estudiante")
-    lista_estudiantes = df_estudiantes["Estudiante"].dropna().tolist()
-    estudiante = st.selectbox("Seleccione su nombre:", lista_estudiantes)
-
-if not hoja_ejercicio.empty:
-    st.subheader("🧪 Selección de Proteína Objetivo")
-    lista_proteinas = ["Seleccionar proteína"] + hoja_ejercicio["Nombre"].dropna().tolist()
-    seleccion = st.selectbox("Seleccione una proteína para visualizar sus propiedades:", lista_proteinas)
-
-    if seleccion != "Seleccionar proteína":
-        df_proteina = hoja_ejercicio[hoja_ejercicio["Nombre"] == seleccion].copy()
-        columnas_bandas = [col for col in df_proteina.columns if col.startswith("Banda")]
-        df_info = df_proteina.drop(columns=columnas_bandas).T
-        df_info.columns = ["Valor"]
-        st.markdown("### 🔬 Propiedades Generales de la Proteína")
-        st.dataframe(df_info)
-
-        # Bandas SDS-PAGE
-        st.markdown("### 🧫 Análisis SDS-PAGE (Bandas Detectadas)")
-        bandas = []
-        for col in columnas_bandas:
-            datos = df_proteina.iloc[0][col]
-            if pd.notna(datos):
-                valores = datos.split(";")
-                if len(valores) == 4:
-                    bandas.append({
-                        "Banda": col.split()[-1],
-                        "Recorrido": valores[0],
-                        "Abundancia (%)": valores[1],
-                        "Carga neta": valores[2],
-                        "Propiedad estructural": valores[3]
-                    })
-        df_bandas = pd.DataFrame(bandas)
-        st.dataframe(df_bandas)
-
-        # Bloque: Estrategia de Purificación por Etapas
-        st.subheader("⚗️ Estrategia de Purificación")
-        tecnicas = df_purificacion["Técnica"].dropna().unique().tolist()
-
-        objetivo = df_bandas[df_bandas["Propiedad estructural"].str.lower() == "objetivo"]
-        abundancia_objetivo = float(objetivo["Abundancia (%)"].values[0]) if not objetivo.empty else 0
-        recorrido_obj = float(objetivo["Recorrido"].values[0]) if not objetivo.empty else 0
-
-        log_mr_obj = 2.2 - 0.015 * recorrido_obj
-        mr_objetivo = 10 ** log_mr_obj
-        cantidad_mezcla = float(df_proteina["Cantidad (mg)"].values[0])
-        pureza_inicial = abundancia_objetivo
-        etiquetas = str(df_proteina["Etiquetas"].values[0])
-        carga_texto = str(df_proteina["Carga"].values[0]).strip().replace(',', '.')
-        try:
-            carga_proteina = int(carga_texto)
-        except:
-            carga_proteina = 0
-
-costos_acumulados = 0
-tiempo_total_h = 0
-for i in range(1, 5):
-            st.markdown(f"**Etapa {i}**")
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                tecnica = st.selectbox(f"Técnica {i}", ["Seleccionar"] + tecnicas, key=f"tecnica_{i}")
-            with col2:
-                corridas = st.number_input(f"Corridas {i}", min_value=1, step=1, key=f"corridas_{i}")
-            with col3:
-                velocidad = st.number_input(f"Velocidad (mg/min) {i}", min_value=0.1, step=0.1, key=f"velocidad_{i}")
-
-            if tecnica != "Seleccionar":
-                mensaje_validacion = ""
-                if tecnica == "Intercambio catiónico (CIEX)" and carga_proteina < 1:
-                    mensaje_validacion = "❌ La proteína no tiene carga positiva suficiente para CIEX."
-                elif tecnica == "Intercambio aniónico (AIEX)" and carga_proteina > -1:
-                    mensaje_validacion = "❌ La proteína no tiene carga negativa suficiente para AIEX."
-                elif "His-tag" in tecnica and "His-tag" not in etiquetas:
-                    mensaje_validacion = "❌ La proteína no tiene etiqueta His-tag requerida."
-                elif "lectina" in tecnica.lower() and "Glicoproteína" not in etiquetas:
-                    mensaje_validacion = "❌ La proteína no es una glicoproteína, no puede usarse afinidad por lectina."
-                elif tecnica == "Cromatografía por tamaño (SEC)":
-                    mr_estimado = 60  # valor límite SEC
-                    st.text(f"Mr objetivo calculado: {mr_objetivo:.1f} kDa")
-                    st.text(f"Límite máximo SEC: {mr_estimado:.1f} kDa")
-                    if mr_objetivo > mr_estimado:
-                        mensaje_validacion = f"❌ La proteína ({mr_objetivo:.1f} kDa) es demasiado grande para SEC (límite ≈ {mr_estimado:.1f} kDa)."
-                if mensaje_validacion:
-                    st.warning(mensaje_validacion)
-
-                params = df_purificacion[df_purificacion["Técnica"] == tecnica].iloc[0]
-                capacidad = float(params["Capacidad (mg)"])
-                costo_columna = float(params["Costo (USD)"])
-                recuperacion_pct = float(params["Recuperación (%)"])
-                pureza_base = float(params["Pureza base (%)"])
-                vmax = float(params["Velocidad media (mg/min)"])
-                pmax = float(params["Pureza máxima (%)"])
-
-                carga = carga_por_corrida(cantidad_mezcla, corridas)
-                fs = factor_saturacion(carga, capacidad)
-                recuperacion = recuperacion_proteina(recuperacion_pct, fs, cantidad_mezcla, pureza_inicial)
-                pureza_estim = calcular_pureza(velocidad, pureza_base, vmax, pmax, pureza_inicial)
-                pureza_corr = ajustar_pureza_por_selectividad(tecnica, pureza_estim, df_bandas)
-                tiempo_min = calcular_tiempo(carga, velocidad, corridas)
-                tiempo_h = tiempo_min / 60
-                costo_total = calcular_costo(costo_columna, corridas)
-
-                st.markdown(f"✅ **Resultados Etapa {i}:**")
-                st.markdown(f"- Carga por corrida: `{carga:.1f}` mg")
-                st.markdown(f"- Factor de saturación: `{fs:.2f}`")
-                st.markdown(f"- Recuperación: `{recuperacion:.1f}` mg")
-                st.markdown(f"- Pureza estimada: `{pureza_estim:.1f}` %, ajustada: `{pureza_corr:.1f}` %")
-                st.markdown(f"- Tiempo: `{tiempo_h:.2f}` h")
-                st.markdown(f"- Costo: `${costo_total:.2f}`")
-
-                cantidad_mezcla = recuperacion
-                pureza_inicial = pureza_corr
-
-        # BLOQUE FINAL: GANANCIA Y RENTABILIDAD
-st.subheader("💰 Resultados Finales del Proceso")
-st.markdown("Estos valores consideran únicamente la última etapa procesada:")
-
-# Obtener valor comercial desde df_datos según pureza alcanzada
-valor_comercial = 0
-try:
-niveles = [1, 2, 3, 4]
-for nivel in niveles:
-pureza_min = float(df_datos[df_datos["Parametro"] == f"Pureza mínima nivel {nivel} (%)"]["Valor"].values[0])
-precio = float(df_datos[df_datos["Parametro"] == f"Valor comercial nivel {nivel} (USD)"]["Valor"].values[0])
-if pureza_corr >= pureza_min:
-valor_comercial = precio
-except:
-valor_comercial = 0
-
-# Costo fijo operativo
-try:
-costo_fijo_hora = float(df_datos[df_datos["Parametro"] == "Costos fijos operativos (USD/h)"].iloc[0]["Valor"])
-except:
-costo_fijo_hora = 0
-
-# Sumar tiempos y costos acumulados
-tiempo_total_h = sum([calcular_tiempo(carga_por_corrida(float(df_proteina["Cantidad (mg)"].values[0]) if i == 1 else 0, 1), velocidad, 1)/60 for i in range(1, 5)])
-costo_total_final = costos_acumulados  # Debería acumular los costos reales si se ajusta etapa por etapa
-
-# Ganancia y rentabilidad
-ganancia_neta = calcular_ganancia_neta(recuperacion, valor_comercial, costo_total_final, costo_fijo_hora, tiempo_total_h)
-rentabilidad = calcular_rentabilidad(ganancia_neta, tiempo_h)
-
-st.markdown("---")
-st.markdown("### 💼 Resumen Final")
-st.markdown(f"- 🧪 Recuperación final: `{recuperacion:.1f}` mg")
-st.markdown(f"- 🎯 Pureza final alcanzada: `{pureza_corr:.1f}` %")
-st.markdown(f"- ⏱️ Tiempo total: `{tiempo_total_h:.2f}` h")
-st.markdown(f"- 💲 Costo total (USD): `{costos_acumulados:.2f}`")
-st.markdown(f"- 💵 Valor comercial aplicado: `${valor_comercial:.2f}` por mg")
-st.markdown(f"- 📈 Ganancia neta: `${ganancia_neta:.2f}`")
-st.markdown(f"- 📊 Rentabilidad: `{rentabilidad:.2f} USD/h`")
+def calcular_rentabilidad(ganancia_neta, tiempo_total_h):
+    if tiempo_total_h == 0:
+        return 0
+    return ganancia_neta / tiempo_total_h
