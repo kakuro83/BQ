@@ -203,3 +203,32 @@ if not hoja_ejercicio.empty:
 
                 cantidad_mezcla = recuperacion
                 pureza_inicial = pureza_corr
+
+        # BLOQUE FINAL: GANANCIA Y RENTABILIDAD
+        st.subheader("💰 Resultados Finales del Proceso")
+        st.markdown("Estos valores consideran únicamente la última etapa procesada:")
+
+        # Obtener valor comercial desde df_datos según pureza alcanzada
+        valor_comercial = 0
+        try:
+            niveles = [1, 2, 3, 4]
+            for nivel in niveles:
+                pureza_min = float(df_datos[df_datos["Parametro"] == f"Pureza mínima nivel {nivel} (%)"]["Valor"].values[0])
+                precio = float(df_datos[df_datos["Parametro"] == f"Valor comercial nivel {nivel} (USD)"]["Valor"].values[0])
+                if pureza_corr >= pureza_min:
+                    valor_comercial = precio
+        except:
+            valor_comercial = 0
+
+        # Costo fijo operativo
+        try:
+            costo_fijo_hora = float(df_datos[df_datos["Parametro"] == "Costos fijos operativos (USD/h)"].iloc[0]["Valor"])
+        except:
+            costo_fijo_hora = 0
+
+        ganancia_neta = calcular_ganancia_neta(recuperacion, valor_comercial, costo_total, costo_fijo_hora, tiempo_h)
+        rentabilidad = calcular_rentabilidad(ganancia_neta, tiempo_h)
+
+        st.markdown(f"- 💵 Valor comercial aplicado: `${valor_comercial:.2f}` por mg")
+        st.markdown(f"- 📈 Ganancia neta: `${ganancia_neta:.2f}`")
+        st.markdown(f"- 📊 Rentabilidad: `{rentabilidad:.2f} USD/h`")
