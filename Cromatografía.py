@@ -174,39 +174,4 @@ if not hoja_ejercicio.empty:
                         st.text(f"Límite estimado SEC: {mr_estimado:.1f} kDa")
                         if mr_objetivo > mr_estimado:
                             st.text(f"Mr objetivo: {mr_objetivo:.1f} kDa vs límite SEC: {mr_estimado:.1f} kDa")
-                            mensaje_validacion = f"❌ La proteína ({mr_objetivo:.1f} kDa) es demasiado grande para SEC (límite ≈ {mr_estimado:.1f} kDa)." kDa) es demasiado grande para SEC (límite ≈ {mr_estimado:.1f} kDa)."
-                    except:
-                        mensaje_validacion = "⚠️ No se pudo calcular el límite de SEC por recorrido."
-
-                if mensaje_validacion:
-                    st.warning(mensaje_validacion)
-                params = df_purificacion[df_purificacion["Técnica"] == tecnica].iloc[0]
-                capacidad = float(params["Capacidad (mg)"])
-                costo_columna = float(params["Costo (USD)"])
-                recuperacion_pct = float(params["Recuperación (%)"])
-                pureza_base = float(params["Pureza base (%)"])
-                vmax = float(params["Velocidad media (mg/min)"])
-                pmax = float(params["Pureza máxima (%)"])
-
-                carga = carga_por_corrida(cantidad_mezcla, corridas)
-                fs = factor_saturacion(carga, capacidad)
-                recuperacion = recuperacion_proteina(recuperacion_pct, fs, cantidad_mezcla, abundancia_objetivo)
-                pureza_estim = calcular_pureza(velocidad, pureza_base, vmax, pmax, pureza_inicial)
-                pureza_corr = ajustar_pureza_por_selectividad(tecnica, pureza_estim, df_bandas)
-                tiempo_min = calcular_tiempo(carga, velocidad, corridas)
-                tiempo_h = tiempo_min / 60
-                costo_total = calcular_costo(costo_columna, corridas)
-
-                st.markdown(f"✅ **Resultados Etapa {i}:**")
-                st.markdown(f"- Carga por corrida: `{carga:.1f}` mg")
-                st.markdown(f"- Factor de saturación: `{fs:.2f}`")
-                st.markdown(f"- Recuperación: `{recuperacion:.1f}` mg")
-                st.markdown(f"- Pureza estimada: `{pureza_estim:.1f}` %, ajustada: `{pureza_corr:.1f}` %")
-                st.markdown(f"- Tiempo: `{tiempo_h:.2f}` h")
-                st.markdown(f"- Costo: `${costo_total:.2f}`")
-
-                # Actualizar variables acumuladas para la siguiente etapa
-                cantidad_mezcla = recuperacion
-                pureza_inicial = pureza_corr
-
-st.info("Esta es la vista base de los datos. A partir de aquí construiremos la lógica para diseñar la estrategia de purificación.")
+                            mensaje_validacion = f"❌ La proteína ({mr_objetivo:.1f} kDa) es demasiado grande para SEC (límite ≈ {mr_estimado:.1f} kDa)."
