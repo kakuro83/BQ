@@ -21,14 +21,14 @@ sheets = {"Ejercicio": "0"}
 
 # Funciones auxiliares de carga
 def cargar_hoja(nombre, gid):
-try:
+    try:
     enlace = url_hoja + gid
     df = pd.read_csv(enlace)
     st.success(f"✅ Hoja '{nombre}' cargada correctamente desde Google Sheets.")
     return df
-except:
-        st.error(f"❌ Error al cargar la hoja '{nombre}': {e}")
-        return pd.DataFrame()
+    except:
+    st.error(f"❌ Error al cargar la hoja '{nombre}': {e}")
+    return pd.DataFrame()
 
 @st.cache_data
 def cargar_csv_desde_github(url_raw, nombre, header='infer', names=None):
