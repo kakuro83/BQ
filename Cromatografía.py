@@ -150,6 +150,7 @@ if not hoja_ejercicio.empty:
                 carga_texto = str(df_proteina["Carga"].values[0]).strip().replace(',', '.')
                 try:
                     carga_proteina = int(carga_texto)
+                    st.text(f"Carga interpretada: {carga_proteina}")
                 except:
                     carga_proteina = 0
                 etiquetas = str(df_proteina["Etiquetas"].values[0])
@@ -167,8 +168,10 @@ if not hoja_ejercicio.empty:
                         recorrido_obj = float(objetivo["Recorrido"].values[0])
                         log_mr = 2.2 - 0.015 * recorrido_obj
                         mr_estimado = 10 ** log_mr
-                        mr_objetivo = float(df_proteina["Mr (kDa)"].values[0])
+                        log_mr_obj = 2.2 - 0.015 * recorrido_obj
+                        mr_objetivo = 10 ** log_mr_obj
                         if mr_objetivo > mr_estimado:
+                            st.text(f"Mr objetivo: {mr_objetivo:.1f} kDa vs límite SEC: {mr_estimado:.1f} kDa")
                             mensaje_validacion = f"❌ La proteína ({mr_proteina:.1f} kDa) es demasiado grande para SEC (límite ≈ {mr_estimado:.1f} kDa)."
                     except:
                         mensaje_validacion = "⚠️ No se pudo calcular el límite de SEC por recorrido."
