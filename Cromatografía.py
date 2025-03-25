@@ -208,40 +208,40 @@ for i in range(1, 5):
 
         # BLOQUE FINAL: GANANCIA Y RENTABILIDAD
 st.subheader("💰 Resultados Finales del Proceso")
-        st.markdown("Estos valores consideran únicamente la última etapa procesada:")
+st.markdown("Estos valores consideran únicamente la última etapa procesada:")
 
-        # Obtener valor comercial desde df_datos según pureza alcanzada
-        valor_comercial = 0
-        try:
-            niveles = [1, 2, 3, 4]
-            for nivel in niveles:
-                pureza_min = float(df_datos[df_datos["Parametro"] == f"Pureza mínima nivel {nivel} (%)"]["Valor"].values[0])
-                precio = float(df_datos[df_datos["Parametro"] == f"Valor comercial nivel {nivel} (USD)"]["Valor"].values[0])
-                if pureza_corr >= pureza_min:
-                    valor_comercial = precio
-        except:
-            valor_comercial = 0
+# Obtener valor comercial desde df_datos según pureza alcanzada
+valor_comercial = 0
+try:
+niveles = [1, 2, 3, 4]
+for nivel in niveles:
+pureza_min = float(df_datos[df_datos["Parametro"] == f"Pureza mínima nivel {nivel} (%)"]["Valor"].values[0])
+precio = float(df_datos[df_datos["Parametro"] == f"Valor comercial nivel {nivel} (USD)"]["Valor"].values[0])
+if pureza_corr >= pureza_min:
+valor_comercial = precio
+except:
+valor_comercial = 0
 
-        # Costo fijo operativo
-        try:
-            costo_fijo_hora = float(df_datos[df_datos["Parametro"] == "Costos fijos operativos (USD/h)"].iloc[0]["Valor"])
-        except:
-            costo_fijo_hora = 0
+# Costo fijo operativo
+try:
+costo_fijo_hora = float(df_datos[df_datos["Parametro"] == "Costos fijos operativos (USD/h)"].iloc[0]["Valor"])
+except:
+costo_fijo_hora = 0
 
-        # Sumar tiempos y costos acumulados
-        tiempo_total_h = sum([calcular_tiempo(carga_por_corrida(float(df_proteina["Cantidad (mg)"].values[0]) if i == 1 else 0, 1), velocidad, 1)/60 for i in range(1, 5)])
-        costo_total_final = costos_acumulados  # Debería acumular los costos reales si se ajusta etapa por etapa
+# Sumar tiempos y costos acumulados
+tiempo_total_h = sum([calcular_tiempo(carga_por_corrida(float(df_proteina["Cantidad (mg)"].values[0]) if i == 1 else 0, 1), velocidad, 1)/60 for i in range(1, 5)])
+costo_total_final = costos_acumulados  # Debería acumular los costos reales si se ajusta etapa por etapa
 
-        # Ganancia y rentabilidad
-        ganancia_neta = calcular_ganancia_neta(recuperacion, valor_comercial, costo_total_final, costo_fijo_hora, tiempo_total_h)
-        rentabilidad = calcular_rentabilidad(ganancia_neta, tiempo_h)
+# Ganancia y rentabilidad
+ganancia_neta = calcular_ganancia_neta(recuperacion, valor_comercial, costo_total_final, costo_fijo_hora, tiempo_total_h)
+rentabilidad = calcular_rentabilidad(ganancia_neta, tiempo_h)
 
-        st.markdown("---")
-        st.markdown("### 💼 Resumen Final")
-        st.markdown(f"- 🧪 Recuperación final: `{recuperacion:.1f}` mg")
-        st.markdown(f"- 🎯 Pureza final alcanzada: `{pureza_corr:.1f}` %")
-        st.markdown(f"- ⏱️ Tiempo total: `{tiempo_total_h:.2f}` h")
-        st.markdown(f"- 💲 Costo total (USD): `{costos_acumulados:.2f}`")
-        st.markdown(f"- 💵 Valor comercial aplicado: `${valor_comercial:.2f}` por mg")
-        st.markdown(f"- 📈 Ganancia neta: `${ganancia_neta:.2f}`")
-        st.markdown(f"- 📊 Rentabilidad: `{rentabilidad:.2f} USD/h`")
+st.markdown("---")
+st.markdown("### 💼 Resumen Final")
+st.markdown(f"- 🧪 Recuperación final: `{recuperacion:.1f}` mg")
+st.markdown(f"- 🎯 Pureza final alcanzada: `{pureza_corr:.1f}` %")
+st.markdown(f"- ⏱️ Tiempo total: `{tiempo_total_h:.2f}` h")
+st.markdown(f"- 💲 Costo total (USD): `{costos_acumulados:.2f}`")
+st.markdown(f"- 💵 Valor comercial aplicado: `${valor_comercial:.2f}` por mg")
+st.markdown(f"- 📈 Ganancia neta: `${ganancia_neta:.2f}`")
+st.markdown(f"- 📊 Rentabilidad: `{rentabilidad:.2f} USD/h`")
