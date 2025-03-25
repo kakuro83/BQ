@@ -69,4 +69,59 @@ def ajustar_pureza_por_selectividad(tecnica, pureza_estim, df_bandas):
     pureza_corr = (abundancia_obj / suma_abundancias) * pureza_estim
     return round(pureza_corr, 2)
 
-# Resto del código será reinsertado progresivamente si lo necesitas
+# Carga de hojas desde GitHub
+url_purificacion = "https://raw.githubusercontent.com/kakuro83/BQ/main/Purificaci%C3%B3n.csv"
+url_datos = "https://raw.githubusercontent.com/kakuro83/BQ/main/Datos.csv"
+url_estudiantes = "https://raw.githubusercontent.com/kakuro83/BQ/main/Estudiantes.txt"
+
+hoja_ejercicio = cargar_hoja("Ejercicio", sheets["Ejercicio"])
+df_purificacion = cargar_csv_desde_github(url_purificacion, "Purificación")
+df_datos = cargar_csv_desde_github(url_datos, "Datos")
+df_estudiantes = cargar_csv_desde_github(url_estudiantes, "Estudiantes", header=None, names=["Estudiante"])
+
+# Mostrar datos fijos
+if not df_datos.empty:
+    st.subheader("📊 Datos Fijos")
+    st.dataframe(df_datos)
+
+if not df_purificacion.empty:
+    st.subheader("🧬 Información de las Columnas de Purificación")
+    st.dataframe(df_purificacion)
+
+if not df_estudiantes.empty:
+    st.subheader("👤 Selección de Estudiante")
+    lista_estudiantes = df_estudiantes["Estudiante"].dropna().tolist()
+    estudiante = st.selectbox("Seleccione su nombre:", lista_estudiantes)
+
+if not hoja_ejercicio.empty:
+    st.subheader("🧪 Selección de Proteína Objetivo")
+    lista_proteinas = ["Seleccionar proteína"] + hoja_ejercicio["Nombre"].dropna().tolist()
+    seleccion = st.selectbox("Seleccione una proteína para visualizar sus propiedades:", lista_proteinas)
+
+    if seleccion != "Seleccionar proteína":
+        df_proteina = hoja_ejercicio[hoja_ejercicio["Nombre"] == seleccion].copy()
+        columnas_bandas = [col for col in df_proteina.columns if col.startswith("Banda")]
+        df_info = df_proteina.drop(columns=columnas_bandas).T
+        df_info.columns = ["Valor"]
+        st.markdown("### 🔬 Propiedades Generales de la Proteína")
+        st.dataframe(df_info)
+
+        # Bandas SDS-PAGE
+        st.markdown("### 🧫 Análisis SDS-PAGE (Bandas Detectadas)")
+        bandas = []
+        for col in columnas_bandas:
+            datos = df_proteina.iloc[0][col]
+            if pd.notna(datos):
+                valores = datos.split(";")
+                if len(valores) == 4:
+                    bandas.append({
+                        "Banda": col.split()[-1],
+                        "Recorrido": valores[0],
+                        "Abundancia (%)": valores[1],
+                        "Carga neta": valores[2],
+                        "Propiedad estructural": valores[3]
+                    })
+        df_bandas = pd.DataFrame(bandas)
+        st.dataframe(df_bandas)
+
+        st.info("Esta es la vista base de los datos. A partir de aquí construiremos la lógica para diseñar la estrategia de purificación.")
