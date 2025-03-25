@@ -121,8 +121,14 @@ if proteina_seleccionada != "Seleccionar proteína":
 # Bloque de estrategia: diseño de hasta 4 etapas
     st.header("⚗️ Estrategia de Purificación")
 
-    # Inicializar condiciones iniciales
-    abundancia_objetivo = float(df_proteina["Abundancia (%)"].values[0])
+    # Obtener abundancia desde SDS-PAGE
+    objetivo = df_bandas[df_bandas["Propiedad estructural"].str.lower() == "objetivo"]
+    if not objetivo.empty:
+        abundancia_objetivo = float(objetivo["Abundancia (%)"].values[0])
+    else:
+        st.error("❌ No se encontró la banda con 'Objetivo' en el análisis SDS-PAGE.")
+        st.stop()
+
     pureza_inicial = abundancia_objetivo
     recuperacion = float(df_proteina["Cantidad (mg)"].values[0])
 
