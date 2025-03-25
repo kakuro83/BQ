@@ -100,7 +100,8 @@ if not hoja_ejercicio.empty:
         st.subheader("⚗️ Estrategia de Purificación")
         tecnicas = df_purificacion["Técnica"].dropna().unique().tolist()
         cantidad_mezcla = float(df_proteina["Cantidad (mg)"].values[0])
-        abundancia_objetivo = float(df_proteina["Abundancia (%)"].values[0])
+        objetivo = df_bandas[df_bandas["Propiedad estructural"].str.lower() == "objetivo"]
+        abundancia_objetivo = float(objetivo["Abundancia (%)"].values[0]) if not objetivo.empty else 0
         pureza_inicial = abundancia_objetivo
 
         for i in range(1, 5):
