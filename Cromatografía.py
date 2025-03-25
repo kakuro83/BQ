@@ -147,7 +147,11 @@ if not hoja_ejercicio.empty:
             if tecnica != "Seleccionar":
                 # Validación de condiciones de uso de columna
                 mensaje_validacion = ""
-                carga_proteina = int(df_proteina["Carga"].values[0])
+                carga_texto = str(df_proteina["Carga"].values[0]).strip().replace('+','')
+                try:
+                    carga_proteina = int(carga_texto)
+                except:
+                    carga_proteina = 0
                 etiquetas = str(df_proteina["Etiquetas"].values[0])
 
                 if tecnica == "CIEX" and carga_proteina < 1:
@@ -163,7 +167,7 @@ if not hoja_ejercicio.empty:
                         recorrido_obj = float(objetivo["Recorrido"].values[0])
                         log_mr = 2.2 - 0.015 * recorrido_obj
                         mr_estimado = 10 ** log_mr
-                        mr_proteina = float(df_proteina["Mr (kDa)"].values[0])
+                        mr_proteina = 10 ** (2.2 - 0.015 * recorrido_obj)  # Recalculado con ecuación SEC usando recorrido
                         if mr_proteina > mr_estimado:
                             mensaje_validacion = f"❌ La proteína ({mr_proteina:.1f} kDa) es demasiado grande para SEC (límite ≈ {mr_estimado:.1f} kDa)."
                     except:
