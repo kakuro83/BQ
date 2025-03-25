@@ -174,3 +174,5 @@ if not hoja_ejercicio.empty:
                         if mr_objetivo > mr_estimado:
                             st.text(f"Mr objetivo: {mr_objetivo:.1f} kDa vs límite SEC: {mr_estimado:.1f} kDa")
                             mensaje_validacion = f"❌ La proteína ({mr_objetivo:.1f} kDa) es demasiado grande para SEC (límite ≈ {mr_estimado:.1f} kDa)."
+                    except Exception as e:
+                        mensaje_validacion = f"⚠️ Error al calcular Mr para SEC: {e}"
