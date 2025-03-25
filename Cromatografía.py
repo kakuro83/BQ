@@ -117,3 +117,66 @@ if proteina_seleccionada != "Seleccionar proteína":
     df_bandas = pd.DataFrame(data_bandas)
     st.subheader("🧫 Bandas SDS-PAGE de la mezcla")
     st.dataframe(df_bandas)
+# Bloque de estrategia: diseño de hasta 4 etapas
+st.header("⚗️ Estrategia de Purificación")
+
+# Inicializar condiciones iniciales
+abundancia_objetivo = float(df_proteina["Abundancia (%)"].values[0])
+pureza_inicial = abundancia_objetivo
+recuperacion = float(df_proteina["Cantidad (mg)"].values[0])
+
+# Inicializar acumuladores
+costos_acumulados = 0
+tiempo_total_h = 0
+
+# Lista de técnicas disponibles
+opciones_tecnicas = ["Seleccionar"] + df_purificacion["Técnica"].dropna().tolist()
+
+for i in range(1, 5):
+    st.markdown(f"### Etapa {i}")
+    col1, col2, col3 = st.columns(3)
+    tecnica = col1.selectbox(f"Técnica {i}", opciones_tecnicas, key=f"tecnica_{i}")
+    corridas = col2.number_input(f"Corridas {i}", min_value=1, value=1, key=f"corridas_{i}")
+    velocidad = col3.number_input(f"Velocidad (mg/min) {i}", min_value=0.1, value=1.0, step=0.1, key=f"velocidad_{i}")
+
+    if tecnica != "Seleccionar":
+        fila = df_purificacion[df_purificacion["Técnica"] == tecnica]
+        if not fila.empty:
+            capacidad = float(fila["Capacidad (mg)"].values[0])
+            costo_columna = float(fila["Costo (USD)"].values[0])
+            recuperacion_pct = float(fila["Recuperación (%)"].values[0])
+            pureza_base = float(fila["Pureza base (%)"].values[0])
+            vmax = float(fila["Velocidad media (mg/min)"].values[0])
+            pmax = float(fila["Pureza máxima (%)"].values[0])
+
+            cantidad_mezcla = recuperacion
+            carga = carga_por_corrida(cantidad_mezcla, corridas)
+            fs = factor_saturacion(carga, capacidad)
+
+            # Calcular recuperación
+            if fs > 1:
+                recuperacion = recuperacion_proteina(recuperacion_pct, fs, cantidad_mezcla, abundancia_objetivo)
+            else:
+                recuperacion = (recuperacion_pct / 100) * cantidad_mezcla * (abundancia_objetivo / 100)
+
+            # Calcular pureza
+            pureza_estim = calcular_pureza(velocidad, pureza_base, vmax, pmax, pureza_inicial)
+            pureza_corr = ajustar_pureza_por_selectividad(tecnica, pureza_estim, df_bandas)
+
+            # Calcular tiempo y costo
+            tiempo_min = calcular_tiempo(carga, velocidad, corridas)
+            tiempo_h = tiempo_min / 60
+            costo_total = calcular_costo(costo_columna, corridas)
+
+            # Acumuladores globales
+            costos_acumulados += costo_total
+            tiempo_total_h += tiempo_h
+
+            # Mostrar resultados
+            st.success(f"✅ Recuperación: `{recuperacion:.2f}` mg")
+            st.info(f"📊 Pureza estimada: `{pureza_estim:.1f}%` → Ajustada: `{pureza_corr:.1f}%`")
+            st.warning(f"⏱️ Tiempo estimado: `{tiempo_h:.2f}` h")
+            st.markdown(f"💲 Costo total etapa: `{costo_total:.2f} USD`")
+
+            # Actualizar pureza para siguiente etapa
+            pureza_inicial = pureza_corr
