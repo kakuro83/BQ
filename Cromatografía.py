@@ -42,15 +42,11 @@ def cargar_csv_desde_github(url_raw, nombre, header='infer', names=None):
 
 # Función para ajustar la pureza en columnas CIEX o AIEX considerando otras proteínas
 def ajustar_pureza_por_selectividad(tecnica, pureza_estim, df_bandas):
-    if tecnica not in ["Intercambio catiónico (CIEX)", "Intercambio aniónico (AIEX)"]:
-        return pureza_estim
-
     objetivo = df_bandas[df_bandas["Propiedad estructural"].str.lower() == "objetivo"]
     if objetivo.empty:
         return pureza_estim
 
     try:
-        carga_objetivo = int(objetivo["Carga neta"].values[0])
         abundancia_obj = float(objetivo["Abundancia (%)"].values[0])
     except:
         return pureza_estim
@@ -59,6 +55,14 @@ def ajustar_pureza_por_selectividad(tecnica, pureza_estim, df_bandas):
         retenidas = df_bandas[df_bandas["Carga neta"].astype(int) >= 1]
     elif "AIEX" in tecnica:
         retenidas = df_bandas[df_bandas["Carga neta"].astype(int) <= -1]
+    elif "SEC" in tecnica:
+        def calcular_mr(recorrido):
+            try:
+                return 10 ** (2.2 - 0.015 * float(recorrido))
+            except:
+                return float('inf')
+        df_bandas["Mr"] = df_bandas["Recorrido"].apply(calcular_mr)
+        retenidas = df_bandas[df_bandas["Mr"] <= 60]
     else:
         return pureza_estim
 
@@ -182,7 +186,7 @@ if not hoja_ejercicio.empty:
 
                 carga = carga_por_corrida(cantidad_mezcla, corridas)
                 fs = factor_saturacion(carga, capacidad)
-                recuperacion = recuperacion_proteina(recuperacion_pct, fs, cantidad_mezcla, abundancia_objetivo)
+                recuperacion = recuperacion_proteina(recuperacion_pct, fs, cantidad_mezcla, pureza_inicial)
                 pureza_estim = calcular_pureza(velocidad, pureza_base, vmax, pmax, pureza_inicial)
                 pureza_corr = ajustar_pureza_por_selectividad(tecnica, pureza_estim, df_bandas)
                 tiempo_min = calcular_tiempo(carga, velocidad, corridas)
