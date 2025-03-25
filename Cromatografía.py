@@ -166,12 +166,15 @@ if not hoja_ejercicio.empty:
                 elif tecnica == "SEC":
                     try:
                         recorrido_obj = float(objetivo["Recorrido"].values[0])
-                        log_mr = 2.2 - 0.015 * recorrido_obj
-                        mr_estimado = 10 ** log_mr
                         log_mr_obj = 2.2 - 0.015 * recorrido_obj
                         mr_objetivo = 10 ** log_mr_obj
+                        mr_max_sec = 60  # límite fijo de paso para SEC
+                
                         st.text(f"Mr objetivo calculado: {mr_objetivo:.1f} kDa")
-                        st.text(f"Límite estimado SEC: {mr_estimado:.1f} kDa")
-                        if mr_objetivo > mr_estimado:
-                            st.text(f"Mr objetivo: {mr_objetivo:.1f} kDa vs límite SEC: {mr_estimado:.1f} kDa")
-                            mensaje_validacion = f"❌ La proteína ({mr_objetivo:.1f} kDa) es demasiado grande para SEC (límite ≈ {mr_estimado:.1f} kDa)."
+                        st.text(f"Límite máximo SEC: {mr_max_sec:.1f} kDa")
+                
+                        if mr_objetivo > mr_max_sec:
+                            mensaje_validacion = f"❌ La proteína ({mr_objetivo:.1f} kDa) es demasiado grande para SEC (límite ≈ {mr_max_sec:.1f} kDa)."
+                    except:
+                        mensaje_validacion = "⚠️ No se pudo calcular el peso molecular estimado para SEC."
+
