@@ -226,9 +226,16 @@ if not hoja_ejercicio.empty:
         except:
             costo_fijo_hora = 0
 
+        # Ganancia y rentabilidad
         ganancia_neta = calcular_ganancia_neta(recuperacion, valor_comercial, costo_total, costo_fijo_hora, tiempo_h)
         rentabilidad = calcular_rentabilidad(ganancia_neta, tiempo_h)
 
+        st.markdown("---")
+        st.markdown("### 💼 Resumen Final")
+        st.markdown(f"- 🧪 Recuperación final: `{recuperacion:.1f}` mg")
+        st.markdown(f"- 🎯 Pureza final alcanzada: `{pureza_corr:.1f}` %")
+        st.markdown(f"- ⏱️ Tiempo total: `{tiempo_h:.2f}` h")
+        st.markdown(f"- 💲 Costo total (USD): `{costo_total:.2f}`")
         st.markdown(f"- 💵 Valor comercial aplicado: `${valor_comercial:.2f}` por mg")
         st.markdown(f"- 📈 Ganancia neta: `${ganancia_neta:.2f}`")
         st.markdown(f"- 📊 Rentabilidad: `{rentabilidad:.2f} USD/h`")
