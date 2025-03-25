@@ -159,9 +159,9 @@ if not hoja_ejercicio.empty:
                     mensaje_validacion = "❌ La proteína no tiene carga positiva suficiente para CIEX."
                 elif tecnica == "Intercambio aniónico (AIEX)" and carga_proteina > -1:
                     mensaje_validacion = "❌ La proteína no tiene carga negativa suficiente para AIEX."
-                elif "His-tag" in tecnica and "His-tag" not in etiquetas:
+                elif "Afinidad (His-tag)" in tecnica and "His-tag" not in etiquetas:
                     mensaje_validacion = "❌ La proteína no tiene etiqueta His-tag requerida."
-                elif "lectina" in tecnica.lower() and "Glicoproteína" not in etiquetas:
+                elif "Afinidad por lectina" in tecnica.lower() and "Glicoproteína" not in etiquetas:
                     mensaje_validacion = "❌ La proteína no es una glicoproteína, no puede usarse afinidad por lectina."
                 elif tecnica == "Cromatografía por tamaño (SEC)":
                     try:
