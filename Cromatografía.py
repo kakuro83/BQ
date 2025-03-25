@@ -2,6 +2,18 @@
 
 import streamlit as st
 import pandas as pd
+from ecuaciones import (
+    carga_por_corrida,
+    factor_saturacion,
+    recuperacion_proteina,
+    calcular_pureza,
+    calcular_tiempo,
+    calcular_costo,
+    calcular_ganancia_neta,
+    calcular_rentabilidad
+)
+
+st.write("🧪 Función de carga:", carga_por_corrida(1000, 4))
 
 # --- Título de la app ---
 st.set_page_config(page_title="Olimpiada de Bioquímica – Purificación de Proteínas")
@@ -41,8 +53,8 @@ def cargar_csv_desde_github(url_raw, nombre, header='infer', names=None):
 df_ejercicio = cargar_hoja("Ejercicio", sheets["Ejercicio"])
 
 # --- Cargar hojas 'Purificación' y 'Datos' desde CSV en GitHub ---
-url_purificacion = "https://raw.githubusercontent.com/kakuro83/BQ/refs/heads/main/Purificaci%C3%B3n.csv"
-url_datos = "https://raw.githubusercontent.com/kakuro83/BQ/refs/heads/main/Datos.csv"
+url_purificacion = "https://raw.githubusercontent.com/kakuro83/BQ/07db0129a42190db7c548d2be1e7939e24e06833/Purificaci%C3%B3n.csv"
+url_datos = "https://raw.githubusercontent.com/kakuro83/BQ/07db0129a42190db7c548d2be1e7939e24e06833/Datos.csv"
 url_estudiantes = "https://raw.githubusercontent.com/kakuro83/BQ/main/Estudiantes.txt"
 
 df_purificacion = cargar_csv_desde_github(url_purificacion, "Purificación")
