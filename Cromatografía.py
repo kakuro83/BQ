@@ -40,6 +40,36 @@ def cargar_csv_desde_github(url_raw, nombre, header='infer', names=None):
         st.error(f"❌ Error al cargar la hoja '{nombre}': {e}")
         return pd.DataFrame()
 
+# Función para ajustar la pureza en columnas CIEX o AIEX considerando otras proteínas
+
+def ajustar_pureza_por_selectividad(tecnica, pureza_estim, df_bandas):
+    if tecnica not in ["CIEX", "AIEX"]:
+        return pureza_estim
+
+    objetivo = df_bandas[df_bandas["Propiedad estructural"].str.lower() == "objetivo"]
+    if objetivo.empty:
+        return pureza_estim
+
+    try:
+        carga_objetivo = int(objetivo["Carga neta"].values[0])
+        abundancia_obj = float(objetivo["Abundancia (%)"].values[0])
+    except:
+        return pureza_estim
+
+    if tecnica == "CIEX":
+        retenidas = df_bandas[df_bandas["Carga neta"].astype(int) >= 1]
+    elif tecnica == "AIEX":
+        retenidas = df_bandas[df_bandas["Carga neta"].astype(int) <= -1]
+    else:
+        return pureza_estim
+
+    suma_abundancias = retenidas["Abundancia (%)"].astype(float).sum()
+    if suma_abundancias == 0:
+        return pureza_estim
+
+    pureza_corr = (abundancia_obj / suma_abundancias) * pureza_estim
+    return round(pureza_corr, 2)
+
 # URLs de los archivos
 url_purificacion = "https://raw.githubusercontent.com/kakuro83/BQ/main/Purificaci%C3%B3n.csv"
 url_datos = "https://raw.githubusercontent.com/kakuro83/BQ/main/Datos.csv"
