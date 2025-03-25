@@ -228,7 +228,7 @@ if not hoja_ejercicio.empty:
 
         # Sumar tiempos y costos acumulados
         tiempo_total_h = sum([calcular_tiempo(carga_por_corrida(float(df_proteina["Cantidad (mg)"].values[0]) if i == 1 else 0, 1), velocidad, 1)/60 for i in range(1, 5)])
-        costo_total_final = costo_total  # Debería acumular los costos reales si se ajusta etapa por etapa
+        costo_total_final = costos_acumulados  # Debería acumular los costos reales si se ajusta etapa por etapa
 
         # Ganancia y rentabilidad
         ganancia_neta = calcular_ganancia_neta(recuperacion, valor_comercial, costo_total_final, costo_fijo_hora, tiempo_total_h)
