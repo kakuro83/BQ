@@ -41,7 +41,7 @@ def cargar_csv_desde_github(url_raw, nombre, header='infer', names=None):
 df_ejercicio = cargar_hoja("Ejercicio", sheets["Ejercicio"])
 
 # --- Cargar hojas 'Purificación' y 'Datos' desde CSV en GitHub ---
-url_purificacion = "https://raw.githubusercontent.com/kakuro83/BQ/07db0129a42190db7c548d2be1e7939e24e06833/Purificaci%C3%B3n.csv"
+url_purificacion = "https://raw.githubusercontent.com/kakuro83/BQ/refs/heads/main/Purificaci%C3%B3n.csv"
 url_datos = "https://raw.githubusercontent.com/kakuro83/BQ/07db0129a42190db7c548d2be1e7939e24e06833/Datos.csv"
 url_estudiantes = "https://raw.githubusercontent.com/kakuro83/BQ/main/Estudiantes.txt"
 
