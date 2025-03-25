@@ -121,7 +121,7 @@ if proteina_seleccionada != "Seleccionar proteína":
 # Bloque de estrategia: diseño de hasta 4 etapas
     st.header("⚗️ Estrategia de Purificación")
 
-    # Obtener información de la proteína objetivo desde SDS-PAGE
+    # Obtener info de la proteína objetivo desde SDS-PAGE
     objetivo = df_bandas[df_bandas["Propiedad estructural"].str.lower() == "objetivo"]
     if not objetivo.empty:
         abundancia_objetivo = float(objetivo["Abundancia (%)"].values[0])
@@ -132,8 +132,9 @@ if proteina_seleccionada != "Seleccionar proteína":
         st.error("❌ No se encontró la banda con 'Objetivo' en el análisis SDS-PAGE.")
         st.stop()
 
+    # Condiciones iniciales
     pureza_inicial = abundancia_objetivo
-    recuperacion = float(df_proteina["Cantidad (mg)"].values[0])
+    recuperacion_anterior = float(df_proteina["Cantidad (mg)"].values[0]) * (abundancia_objetivo / 100)
     costos_acumulados = 0
     tiempo_total_h = 0
 
@@ -156,7 +157,7 @@ if proteina_seleccionada != "Seleccionar proteína":
                 vmax = float(fila["Velocidad media (mg/min)"].values[0])
                 pmax = float(fila["Pureza máxima (%)"].values[0])
 
-                # Validaciones de uso correcto
+                # Validaciones técnicas por tipo de columna
                 advertencia = ""
                 tecnica_lower = tecnica.lower()
                 if "intercambio catiónico" in tecnica_lower and carga_objetivo < 1:
@@ -175,17 +176,18 @@ if proteina_seleccionada != "Seleccionar proteína":
                 if advertencia:
                     st.warning(advertencia)
 
-                cantidad_mezcla = recuperacion
-                carga = carga_por_corrida(cantidad_mezcla, corridas)
+                # Mezcla de entrada para esta etapa
+                mezcla_etapa = recuperacion_anterior / (pureza_inicial / 100)
+                carga = carga_por_corrida(mezcla_etapa, corridas)
                 fs = factor_saturacion(carga, capacidad)
 
-                # Cálculo de recuperación
+                # Recuperación
                 if fs > 1:
-                    recuperacion = recuperacion_proteina(recuperacion_pct, fs, cantidad_mezcla, abundancia_objetivo)
+                    recuperacion = recuperacion_proteina(recuperacion_pct, fs, mezcla_etapa, pureza_inicial)
                 else:
-                    recuperacion = (recuperacion_pct / 100) * cantidad_mezcla * (abundancia_objetivo / 100)
+                    recuperacion = (recuperacion_pct / 100) * mezcla_etapa * (pureza_inicial / 100)
 
-                # Cálculo de pureza
+                # Pureza
                 pureza_estim = calcular_pureza(velocidad, pureza_base, vmax, pmax, pureza_inicial)
                 pureza_corr = ajustar_pureza_por_selectividad(tecnica, pureza_estim, df_bandas)
 
@@ -194,14 +196,17 @@ if proteina_seleccionada != "Seleccionar proteína":
                 tiempo_h = tiempo_min / 60
                 costo_total = calcular_costo(costo_columna, corridas)
 
-                # Acumuladores
+                # Acumular totales
                 costos_acumulados += costo_total
                 tiempo_total_h += tiempo_h
 
-                # Mostrar resultados
+                # Mostrar resultados por etapa
                 st.success(f"✅ Recuperación: `{recuperacion:.2f}` mg")
                 st.info(f"📊 Pureza estimada: `{pureza_estim:.1f}%` → Ajustada: `{pureza_corr:.1f}%`")
                 st.warning(f"⏱️ Tiempo estimado: `{tiempo_h:.2f}` h")
                 st.markdown(f"💲 Costo total etapa: `{costo_total:.2f} USD`")
+                st.markdown(f"📦 Factor de saturación (Fs): `{fs:.2f}`")
 
+                # Preparar condiciones para la siguiente etapa
                 pureza_inicial = pureza_corr
+                recuperacion_anterior = recuperacion
