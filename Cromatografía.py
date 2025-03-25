@@ -147,9 +147,9 @@ if not hoja_ejercicio.empty:
         except:
             carga_proteina = 0
 
-        costos_acumulados = 0
-        tiempo_total_h = 0
-        for i in range(1, 5):
+costos_acumulados = 0
+tiempo_total_h = 0
+for i in range(1, 5):
             st.markdown(f"**Etapa {i}**")
             col1, col2, col3 = st.columns(3)
             with col1:
