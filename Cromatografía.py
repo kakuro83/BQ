@@ -176,6 +176,11 @@ def ajustar_pureza_por_selectividad(tecnica, pureza_estim, df_bandas):
     pureza_corr = (abundancia_obj / suma_abundancias) * pureza_estim
     return round(pureza_corr, 2)
 
+# ⚠️ Validación previa
+if proteina_seleccionada == "Seleccionar proteína":
+    st.warning("Selecciona una proteína para continuar con la estrategia.")
+    st.stop()
+
 # ⚗️ Estrategia de Purificación
 st.header("⚗️ Estrategia de Purificación")
 
