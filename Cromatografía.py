@@ -39,6 +39,10 @@ def cargar_csv_desde_github(url_raw, nombre, header='infer', names=None):
         st.error(f"❌ Error al cargar la hoja '{nombre}': {e}")
         return pd.DataFrame()
 
+# Carga de hoja Datos antes de usar df_datos
+url_datos = "https://raw.githubusercontent.com/kakuro83/BQ/main/Datos.csv"
+df_datos = cargar_csv_desde_github(url_datos, "Datos")
+
 # 📌 Datos Fijos – Mostrar en expander como lista y tabla de precios
 with st.expander("📌 Ver parámetros generales del sistema"):
     st.markdown("<h4 style='text-align: center;'>📋 Parámetros Generales</h4>", unsafe_allow_html=True)
