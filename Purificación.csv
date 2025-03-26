@@ -1,6 +1,6 @@
 Técnica,Costo (USD),Recuperación (%),Pureza base (%),Capacidad (mg),Velocidad media (mg/min),Pureza máxima (%),Selectividad parcial
-Intercambio catiónico (CIEX),22,70,60,500,30,85,Carga neta ≥ +1
-Intercambio aniónico (AIEX),22,65,55,500,28,82,Carga neta ≤ –1
+Intercambio catiónico (CIEX),22,70,60,500,30,88,Carga neta ≥ +1
+Intercambio aniónico (AIEX),22,65,55,500,28,85,Carga neta ≤ –1
 Cromatografía por tamaño (SEC),15,80,50,400,25,75,Mr ≤ 50 kDa
-Afinidad (His-tag),38,90,90,800,20,98,Presencia de etiqueta His
-Afinidad por lectina,30,75,75,600,25,90,Glicoproteínas
+Afinidad (His-tag),38,90,90,800,20,100,Presencia de etiqueta His
+Afinidad por lectina,30,75,75,600,25,95,Glicoproteínas
