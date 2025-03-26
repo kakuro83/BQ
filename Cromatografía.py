@@ -51,12 +51,15 @@ df_datos = cargar_csv_desde_github(url_datos, "Datos")
 url_estudiantes = "https://raw.githubusercontent.com/kakuro83/BQ/main/Estudiantes.txt"
 df_estudiantes = cargar_csv_desde_github(url_estudiantes, "Estudiantes", header=None, names=["Estudiante"])
 
-# Mostrar los datos fijos con estilo y centrados
-st.markdown("<h3 style='text-align: center'>📌 Datos Fijos</h3>", unsafe_allow_html=True)
-st.dataframe(df_datos.style.set_properties(**{"text-align": "center"}).set_table_styles(
-    [{"selector": "th", "props": [("text-align", "center")]}]), use_container_width=True, hide_index=True)
+# 📌 Datos Fijos – Mostrar en expander como lista
+with st.expander("📌 Ver parámetros generales del sistema"):
+    st.markdown("<h4 style='text-align: center;'>📋 Parámetros Generales</h4>", unsafe_allow_html=True)
+    for _, fila in df_datos.iterrows():
+        parametro = fila["Parámetro"]
+        valor = fila["Valor"]
+        st.markdown(f"- **{parametro}:** {valor}")
 
-# Información de columnas: selección individual
+# 🧪 Información de columnas: selección individual
 st.markdown("<h3 style='text-align: center'>🧪 Información de las Columnas de Purificación</h3>", unsafe_allow_html=True)
 tecnica_elegida = st.selectbox("Selecciona una técnica de purificación:", df_purificacion["Técnica"].dropna().tolist())
 
