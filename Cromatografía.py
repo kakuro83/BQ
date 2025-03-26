@@ -51,12 +51,24 @@ df_datos = cargar_csv_desde_github(url_datos, "Datos")
 url_estudiantes = "https://raw.githubusercontent.com/kakuro83/BQ/main/Estudiantes.txt"
 df_estudiantes = cargar_csv_desde_github(url_estudiantes, "Estudiantes", header=None, names=["Estudiante"])
 
-# Mostrar los datos fijos con estilo
-st.header("📌 Datos Fijos")
+# Mostrar los datos fijos con estilo y centrados
+st.markdown("<h3 style='text-align: center'>📌 Datos Fijos</h3>", unsafe_allow_html=True)
 st.dataframe(df_datos.style.set_properties(**{"text-align": "center"}).set_table_styles(
     [{"selector": "th", "props": [("text-align", "center")]}]), use_container_width=True, hide_index=True)
 
-# Mostrar la información de columnas
-st.header("🧪 Información de las Columnas de Purificación")
-st.dataframe(df_purificacion.style.set_properties(**{"text-align": "center"}).set_table_styles(
-    [{"selector": "th", "props": [("text-align", "center")]}]), use_container_width=True, hide_index=True)
+# Información de columnas: selección individual
+st.markdown("<h3 style='text-align: center'>🧪 Información de las Columnas de Purificación</h3>", unsafe_allow_html=True)
+tecnica_elegida = st.selectbox("Selecciona una técnica de purificación:", df_purificacion["Técnica"].dropna().tolist())
+
+fila_columna = df_purificacion[df_purificacion["Técnica"] == tecnica_elegida]
+if not fila_columna.empty:
+    fila = fila_columna.iloc[0]
+    st.markdown("**📋 Detalles de la columna seleccionada:**")
+    st.markdown(f"""
+- **Capacidad:** {fila['Capacidad (mg)']} mg  
+- **Costo:** {fila['Costo (USD)']} USD  
+- **Recuperación estimada:** {fila['Recuperación (%)']} %  
+- **Pureza base:** {fila['Pureza base (%)']} %  
+- **Velocidad media:** {fila['Velocidad media (mg/min)']} mg/min  
+- **Pureza máxima alcanzable:** {fila['Pureza máxima (%)']} %
+""")
