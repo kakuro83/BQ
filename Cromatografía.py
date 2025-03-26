@@ -38,16 +38,16 @@ def cargar_hoja(nombre, gid):
         st.error(f"❌ Error al cargar la hoja '{nombre}': {e}")
         return pd.DataFrame()
 
-# Función para cargar CSV desde GitHub
-#@st.cache_data
-#def cargar_csv_desde_github(url_raw, nombre, header='infer', names=None):
-   # try:
-      #  df = pd.read_csv(url_raw, header=header, names=names)
-        # st.success(f"✅ Hoja '{nombre}' cargada correctamente desde GitHub.")
-     #   return df
- #   except Exception as e:
-    #    st.error(f"❌ Error al cargar la hoja '{nombre}': {e}")
-    #    return pd.DataFrame()
+Función para cargar CSV desde GitHub
+@st.cache_data
+def cargar_csv_desde_github(url_raw, nombre, header='infer', names=None):
+   try:
+      df = pd.read_csv(url_raw, header=header, names=names)
+        st.success(f"✅ Hoja '{nombre}' cargada correctamente desde GitHub.")
+        return df
+    except Exception as e:
+        st.error(f"❌ Error al cargar la hoja '{nombre}': {e}")
+        return pd.DataFrame()
 
 # 📌 Datos Fijos – Mostrar en expander como lista y tabla de precios
 with st.expander("📌 Ver parámetros generales del sistema"):
