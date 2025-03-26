@@ -24,7 +24,7 @@ def cargar_hoja(nombre, gid):
     try:
         enlace = url_hoja + gid
         df = pd.read_csv(enlace)
-        st.success(f"✅ Hoja '{nombre}' cargada correctamente desde Google Sheets.")
+        # st.success(f"✅ Hoja '{nombre}' cargada correctamente desde Google Sheets.")  # Oculto
         return df
     except Exception as e:
         st.error(f"❌ Error al cargar la hoja '{nombre}': {e}")
@@ -35,7 +35,7 @@ def cargar_hoja(nombre, gid):
 def cargar_csv_desde_github(url_raw, nombre, header='infer', names=None):
     try:
         df = pd.read_csv(url_raw, header=header, names=names)
-        st.success(f"✅ Hoja '{nombre}' cargada correctamente desde GitHub.")
+        # st.success(f"✅ Hoja '{nombre}' cargada correctamente desde GitHub.")  # Oculto
         return df
     except Exception as e:
         st.error(f"❌ Error al cargar la hoja '{nombre}': {e}")
@@ -120,6 +120,23 @@ if proteina_seleccionada != "Seleccionar proteína":
 
 # Bloque de estrategia: diseño de hasta 4 etapas
     st.header("⚗️ Estrategia de Purificación")
+st.markdown("""
+🔧 En esta sección debes diseñar una estrategia de hasta **4 etapas de purificación**.
+
+🧪 La **recuperación** de la proteína objetivo depende del **factor de saturación (Fs)**, que se calcula como:
+
+> Fs = Carga pasada por corrida / Capacidad de la columna
+
+📉 Si la columna está sobrecargada (Fs > 1), la recuperación se reduce.
+
+💧 La **pureza** alcanzada dependerá de la **velocidad de alimentación (mg/min)**: velocidades más bajas permiten mejores separaciones.
+
+💰 Los **costos totales** incluyen:
+- El costo por cada corrida de columna,
+- Los **costos fijos operativos (USD/h)**,
+- Y los **costos por tiempo**, que aumentan con la duración del proceso.
+""")
+
 
     # Obtener info de la proteína objetivo desde SDS-PAGE
     objetivo = df_bandas[df_bandas["Propiedad estructural"].str.lower() == "objetivo"]
