@@ -14,8 +14,19 @@ from ecuaciones import (
 st.set_page_config(page_title="Olimpiada de Bioquímica – Purificación de Proteínas")
 st.title("🏆 Estrategia de Purificación de Proteínas")
 
+# Definición de URLs para carga
 url_hoja = "https://docs.google.com/spreadsheets/d/1Rqk1GZ3Y5KKNT5VjTXI-pbFhlVZ-c-XcCCjmXAM6DiQ/export?format=csv&gid="
 sheets = {"Ejercicio": "0"}
+
+url_purificacion = "https://raw.githubusercontent.com/kakuro83/BQ/main/Purificaci%C3%B3n.csv"
+url_datos = "https://raw.githubusercontent.com/kakuro83/BQ/main/Datos.csv"
+url_estudiantes = "https://raw.githubusercontent.com/kakuro83/BQ/main/Estudiantes.txt"
+
+# Cargar los archivos necesarios
+df_ejercicio = cargar_hoja("Ejercicio", sheets["Ejercicio"])
+df_purificacion = cargar_csv_desde_github(url_purificacion, "Purificación")
+df_datos = cargar_csv_desde_github(url_datos, "Datos")
+df_estudiantes = cargar_csv_desde_github(url_estudiantes, "Estudiantes", header=None, names=["Estudiante"])
 
 # Función para cargar desde Google Sheets
 def cargar_hoja(nombre, gid):
@@ -29,19 +40,15 @@ def cargar_hoja(nombre, gid):
         return pd.DataFrame()
 
 # Función para cargar CSV desde GitHub
-@st.cache_data
-def cargar_csv_desde_github(url_raw, nombre, header='infer', names=None):
-    try:
-        df = pd.read_csv(url_raw, header=header, names=names)
+#@st.cache_data
+#def cargar_csv_desde_github(url_raw, nombre, header='infer', names=None):
+   # try:
+      #  df = pd.read_csv(url_raw, header=header, names=names)
         # st.success(f"✅ Hoja '{nombre}' cargada correctamente desde GitHub.")
-        return df
-    except Exception as e:
-        st.error(f"❌ Error al cargar la hoja '{nombre}': {e}")
-        return pd.DataFrame()
-
-# Carga de hoja Datos antes de usar df_datos
-url_datos = "https://raw.githubusercontent.com/kakuro83/BQ/main/Datos.csv"
-df_datos = cargar_csv_desde_github(url_datos, "Datos")
+     #   return df
+ #   except Exception as e:
+    #    st.error(f"❌ Error al cargar la hoja '{nombre}': {e}")
+    #    return pd.DataFrame()
 
 # 📌 Datos Fijos – Mostrar en expander como lista y tabla de precios
 with st.expander("📌 Ver parámetros generales del sistema"):
@@ -88,12 +95,6 @@ with st.expander("📌 Ver parámetros generales del sistema"):
         st.warning("⚠️ No se pudo cargar correctamente la hoja de parámetros.")
 
 # Selección de estudiante y proteína
-url_estudiantes = "https://raw.githubusercontent.com/kakuro83/BQ/main/Estudiantes.txt"
-df_ejercicio = cargar_hoja("Ejercicio", sheets["Ejercicio"])
-df_purificacion = cargar_csv_desde_github(url_purificacion, "Purificación")
-df_datos = cargar_csv_desde_github(url_datos, "Datos")
-df_estudiantes = cargar_csv_desde_github(url_estudiantes, "Estudiantes", header=None, names=["Estudiante"])
-
 st.subheader("🎓 Selección de Participante y Proteína")
 col1, col2 = st.columns(2)
 
