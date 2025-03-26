@@ -139,7 +139,7 @@ st.markdown("""
 
 
     # Obtener info de la proteína objetivo desde SDS-PAGE
-    objetivo = df_bandas[df_bandas["Propiedad estructural"].str.lower() == "objetivo"]
+objetivo = df_bandas[df_bandas["Propiedad estructural"].str.lower() == "objetivo"]
     if not objetivo.empty:
         abundancia_objetivo = float(objetivo["Abundancia (%)"].values[0])
         carga_objetivo = int(objetivo["Carga neta"].values[0])
