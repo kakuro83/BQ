@@ -87,6 +87,7 @@ with st.expander("📌 Ver parámetros generales del sistema"):
 
 url_estudiantes = "https://raw.githubusercontent.com/kakuro83/BQ/main/Estudiantes.txt"
 df_estudiantes = cargar_csv_desde_github(url_estudiantes, "Estudiantes", header=None, names=["Estudiante"])
+df_ejercicio = cargar_hoja("Ejercicio", sheets["Ejercicio"])
 
 # 🎓 Selección de participante y proteína
 st.subheader("🎓 Selección de Participante y Proteína")
