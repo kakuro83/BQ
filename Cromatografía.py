@@ -197,7 +197,7 @@ if proteina_seleccionada != "Seleccionar proteína":
                 costo_operativo = float(costo_operativo_str.replace(",", "."))
                 
                 # Costo total = costo de columna + costo operativo por tiempo
-                costo_total = calcular_costo(costo_columna, corridas) + (tiempo_h * costo_operativo)
+                costo_total = calcular_costo(costo_columna, corridas) + (tiempo_h * costo_operativo * 2)
 
                 # Acumular totales
                 costos_acumulados += costo_total
