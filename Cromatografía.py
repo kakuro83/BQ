@@ -208,7 +208,7 @@ if proteina_seleccionada != "Seleccionar proteína":
                 pureza_inicial = pureza_corr
                 recuperacion_anterior = recuperacion
 
-        # Resultados Finales del Proceso
+    # Resultados Finales del Proceso
     st.subheader("💰 Resultados Finales del Proceso")
     st.markdown("Estos valores consideran únicamente la **última etapa procesada**.")
 
@@ -217,10 +217,10 @@ if proteina_seleccionada != "Seleccionar proteína":
         precios = {}
         umbrales = {}
         for n in niveles:
-            valor = float(df_datos[df_datos["Parámetro"] == f"Valor comercial nivel {n} (USD)"]["Valor"].values[0])
-            pureza_min = float(df_datos[df_datos["Parámetro"] == f"Pureza mínima nivel {n} (%)"]["Valor"].values[0])
-            precios[n] = valor
-            umbrales[n] = pureza_min
+            valor_str = df_datos[df_datos["Parámetro"] == f"Valor comercial nivel {n} (USD)"]["Valor"].values[0]
+            pureza_str = df_datos[df_datos["Parámetro"] == f"Pureza mínima nivel {n} (%)"]["Valor"].values[0]
+            precios[n] = float(valor_str.replace(",", "."))
+            umbrales[n] = float(pureza_str.replace(",", "."))
 
         # Determinar nivel de precio por pureza final
         nivel_aplicado = max([n for n in niveles if pureza_inicial >= umbrales[n]], default=None)
@@ -228,9 +228,11 @@ if proteina_seleccionada != "Seleccionar proteína":
             st.error("❌ No se alcanzó ningún nivel mínimo de pureza comercial.")
             st.stop()
 
+        valor_unitario_str = df_datos[df_datos["Parámetro"] == "Costos fijos operativos (USD/h)"]["Valor"].values[0]
         valor_unitario_usd_mg = precios[nivel_aplicado]
+        costo_operativo = float(valor_unitario_str.replace(",", "."))
+
         ganancia_bruta = recuperacion_anterior * valor_unitario_usd_mg
-        costo_operativo = float(df_datos[df_datos["Parámetro"] == "Costos fijos operativos (USD/h)"]["Valor"].values[0])
         ganancia_neta = ganancia_bruta - costos_acumulados - (costo_operativo * tiempo_total_h)
         rentabilidad = ganancia_neta / tiempo_total_h if tiempo_total_h > 0 else 0
 
@@ -245,3 +247,4 @@ if proteina_seleccionada != "Seleccionar proteína":
 
     except Exception as e:
         st.error(f"❌ Error al calcular los resultados finales: {e}")
+
