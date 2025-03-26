@@ -22,11 +22,9 @@ def recuperacion_proteina(recuperacion_pct, fs, mezcla_mg, pureza_in):
     if fs > 1:
         r = (rb / fs) * mezcla_mg * pi
     else:
-        # Aumento de recuperación cuando Fs < 1
-        beneficio = 1 / fs  # mayor beneficio cuanto menor fs
-        r = rb * mezcla_mg * pi * beneficio
-        r = min(r, proteina_total * 0.95)  # límite del 95 % de la proteína en la mezcla
-    return min(r, mezcla_mg)
+        mejora = rb + (0.95 - rb) * (1 - fs)  # tiende suavemente a 0.95
+        r = mejora * mezcla_mg * pi
+    return r
 
 def calcular_pureza(v, pb, vmax, pmax, pin):
     if vmax == 0:
