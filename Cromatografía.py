@@ -305,3 +305,36 @@ for i in range(1, 5):
             # Preparar condiciones para la siguiente etapa
             pureza_inicial = pureza_corr
             recuperacion_anterior = recuperacion
+
+# 💰 Resultados Finales del Proceso
+st.subheader("💰 Resultados Finales del Proceso")
+st.markdown("Estos valores consideran únicamente la **última etapa procesada**.")
+
+try:
+    niveles = [1, 2, 3, 4]
+    precios = {}
+    umbrales = {}
+    for n in niveles:
+        valor_str = df_datos[df_datos["Parámetro"] == f"Valor comercial nivel {n} (USD)"]["Valor"].values[0]
+        pureza_str = df_datos[df_datos["Parámetro"] == f"Pureza mínima nivel {n} (%)"]["Valor"].values[0]
+        precios[n] = float(valor_str.replace(",", "."))
+        umbrales[n] = float(pureza_str.replace(",", "."))
+
+    nivel_aplicado = max([n for n in niveles if pureza_inicial >= umbrales[n]], default=None)
+    if nivel_aplicado is None:
+        st.error("❌ No se alcanzó ningún nivel mínimo de pureza comercial.")
+        st.stop()
+
+    valor_unitario_usd_mg = precios[nivel_aplicado]
+    costo_operativo_str = df_datos[df_datos["Parámetro"] == "Costos fijos operativos (USD/h)"]["Valor"].values[0]
+    costo_operativo = float(costo_operativo_str.replace(",", "."))
+
+    ganancia_bruta = recuperacion_anterior * valor_unitario_usd_mg
+    ganancia_neta = ganancia_bruta - costos_acumulados - (costo_operativo * tiempo_total_h)
+    rentabilidad = ganancia_neta / tiempo_total_h if tiempo_total_h > 0 else 0
+
+    emoji_ganancia = "😊" if ganancia_neta >= 0 else "😢"
+
+    # Mostrar resultados
+    st.markdown(f"- 🧪 **Pureza final alcanzada:** `{pureza_inicial:.2f}%`")
+    st.markdown(f"- 📦
