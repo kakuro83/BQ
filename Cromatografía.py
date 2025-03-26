@@ -335,11 +335,11 @@ try:
 
     emoji_ganancia = "😊" if ganancia_neta >= 0 else "😢"
 
-# Mostrar resultados
-st.markdown(f"- 🧪 **Pureza final alcanzada:** `{pureza_inicial:.2f}%`")
-st.markdown(f"- 📦 **Recuperación final:** `{recuperacion_anterior:.2f}` mg")
-st.markdown(f"- ⏱️ **Tiempo total del proceso:** `{tiempo_total_h:.2f}` horas")
-st.markdown(f"- 💲 **Costo total acumulado:** `{costos_acumulados:.2f} USD`")
-st.markdown(f"- 💰 **Ganancia neta estimada:** `{ganancia_neta:.2f} USD` {emoji_ganancia}")
-st.markdown(f"- 📈 **Rentabilidad:** `{rentabilidad:.2f} USD/h`")
-st.caption(f"Nivel de pureza comercial aplicado: {nivel_aplicado} (≥ {umbrales[nivel_aplicado]}%) → {valor_unitario_usd_mg} USD/mg")
+    # Mostrar resultados
+    st.markdown(f"- 🧪 **Pureza final alcanzada:** `{pureza_inicial:.2f}%`")
+    st.markdown(f"- 📦 **Recuperación final:** `{recuperacion_anterior:.2f}` mg")
+    st.markdown(f"- ⏱️ **Tiempo total del proceso:** `{tiempo_total_h:.2f}` horas")
+    st.markdown(f"- 💲 **Costo total acumulado:** `{costos_acumulados:.2f} USD`")
+    st.markdown(f"- 💰 **Ganancia neta estimada:** `{ganancia_neta:.2f} USD` {emoji_ganancia}")
+    st.markdown(f"- 📈 **Rentabilidad:** `{rentabilidad:.2f} USD/h`")
+    st.caption(f"Nivel de pureza comercial aplicado: {nivel_aplicado} (≥ {umbrales[nivel_aplicado]}%) → {valor_unitario_usd_mg} USD/mg")
