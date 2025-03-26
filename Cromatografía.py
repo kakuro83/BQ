@@ -347,3 +347,34 @@ try:
 except Exception as e:
     st.error(f"❌ Error al calcular los resultados finales: {e}")
 
+# 📋 Generar código de validación
+siglas_manual = {
+    "afinidad his-tag": "His",
+    "afinidad lectina": "Lec"
+}
+
+codigo_etapas = []
+
+for i in range(1, 5):
+    tecnica = st.session_state.get(f"tecnica_{i}", "Seleccionar")
+    corridas = st.session_state.get(f"corridas_{i}", None)
+    velocidad = st.session_state.get(f"velocidad_{i}", None)
+
+    if tecnica != "Seleccionar" and corridas and velocidad:
+        tecnica_sigla = tecnica.strip().lower()
+        if tecnica_sigla in siglas_manual:
+            sigla = siglas_manual[tecnica_sigla]
+        else:
+            sigla = tecnica.split()[0].upper()  # Usa CIEX, AIEX, SEC por defecto
+        codigo_etapas.append(f"{sigla},{corridas},{velocidad}")
+
+# Agregar ganancia y rentabilidad sin unidades, redondeadas
+if codigo_etapas:
+    resumen_etapas = "-".join(codigo_etapas)
+    resumen_valores = f"{ganancia_neta:.2f},{rentabilidad:.2f}"
+    codigo_validacion = f"{resumen_etapas}:{resumen_valores}"
+
+    st.subheader("🔒 Código de Validación")
+    st.code(codigo_validacion, language="text")
+    st.caption("Puedes copiar este código para registrar tu estrategia.")
+
