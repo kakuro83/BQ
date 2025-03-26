@@ -1,11 +1,11 @@
 Parámetro,Valor
-Costos fijos operativos (USD/h),20
+Costos fijos operativos (USD/h),18
 Pureza mínima nivel 1 (%),60
-Valor comercial nivel 1 (USD),"0,5"
+Valor comercial nivel 1 (USD),1
 Pureza mínima nivel 2 (%),80
 Valor comercial nivel 2 (USD),"1,5"
 Pureza mínima nivel 3 (%),90
 Valor comercial nivel 3 (USD),"2,5"
 Pureza mínima nivel 4 (%),98
-Valor comercial nivel 4 (USD),"5,0"
+Valor comercial nivel 4 (USD),"6,0"
 Curva calibración,Log(Mr) = 2.2 – 0.015 × R
