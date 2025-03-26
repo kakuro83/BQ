@@ -38,3 +38,25 @@ def cargar_csv_desde_github(url_raw, nombre, header='infer', names=None):
     except Exception as e:
         st.error(f"❌ Error al cargar la hoja '{nombre}': {e}")
         return pd.DataFrame()
+
+# Cargar los datos desde Google Sheets y GitHub
+df_ejercicio = cargar_hoja("Ejercicio", sheets["Ejercicio"])
+
+url_purificacion = "https://raw.githubusercontent.com/kakuro83/BQ/main/Purificaci%C3%B3n.csv"
+df_purificacion = cargar_csv_desde_github(url_purificacion, "Purificación")
+
+url_datos = "https://raw.githubusercontent.com/kakuro83/BQ/main/Datos.csv"
+df_datos = cargar_csv_desde_github(url_datos, "Datos")
+
+url_estudiantes = "https://raw.githubusercontent.com/kakuro83/BQ/main/Estudiantes.txt"
+df_estudiantes = cargar_csv_desde_github(url_estudiantes, "Estudiantes", header=None, names=["Estudiante"])
+
+# Mostrar los datos fijos con estilo
+st.header("📌 Datos Fijos")
+st.dataframe(df_datos.style.set_properties(**{"text-align": "center"}).set_table_styles(
+    [{"selector": "th", "props": [("text-align", "center")]}]), use_container_width=True, hide_index=True)
+
+# Mostrar la información de columnas
+st.header("🧪 Información de las Columnas de Purificación")
+st.dataframe(df_purificacion.style.set_properties(**{"text-align": "center"}).set_table_styles(
+    [{"selector": "th", "props": [("text-align", "center")]}]), use_container_width=True, hide_index=True)
