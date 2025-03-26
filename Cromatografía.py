@@ -118,3 +118,23 @@ else:
         hide_index=True
     )
 
+# 🧫 Procesamiento de bandas SDS-PAGE
+bandas = ["A", "B", "C", "D", "E"]
+columnas_bandas = ["Recorrido", "Abundancia (%)", "Carga neta", "Propiedad estructural"]
+data_bandas = {col: [] for col in columnas_bandas}
+
+for banda in bandas:
+    valores = df_proteina[f"Banda {banda}"].values[0].split(";")
+    for i, col in enumerate(columnas_bandas):
+        data_bandas[col].append(valores[i].strip())
+
+df_bandas = pd.DataFrame(data_bandas)
+
+st.subheader("🧫 Bandas SDS-PAGE de la mezcla")
+st.dataframe(
+    df_bandas.style.set_properties(**{"text-align": "center"}).set_table_styles(
+        [{"selector": "th", "props": [("text-align", "center")]}]
+    ),
+    use_container_width=True,
+    hide_index=True
+)
