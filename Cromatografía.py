@@ -143,6 +143,39 @@ if proteina_seleccionada != "Seleccionar proteína":
 url_purificacion = "https://raw.githubusercontent.com/kakuro83/BQ/main/Purificaci%C3%B3n.csv"
 df_purificacion = cargar_csv_desde_github(url_purificacion, "Purificación")
 
+# Función para ajustar la pureza considerando CIEX, AIEX y SEC
+def ajustar_pureza_por_selectividad(tecnica, pureza_estim, df_bandas):
+    objetivo = df_bandas[df_bandas["Propiedad estructural"].str.lower() == "objetivo"]
+    if objetivo.empty:
+        return pureza_estim
+
+    try:
+        abundancia_obj = float(objetivo["Abundancia (%)"].values[0])
+    except:
+        return pureza_estim
+
+    if "CIEX" in tecnica:
+        retenidas = df_bandas[df_bandas["Carga neta"].astype(int) >= 1]
+    elif "AIEX" in tecnica:
+        retenidas = df_bandas[df_bandas["Carga neta"].astype(int) <= -1]
+    elif "SEC" in tecnica:
+        def calcular_mr(recorrido):
+            try:
+                return 10 ** (2.2 - 0.015 * float(recorrido))
+            except:
+                return float('inf')
+        df_bandas["Mr"] = df_bandas["Recorrido"].apply(calcular_mr)
+        retenidas = df_bandas[df_bandas["Mr"] <= 60]
+    else:
+        return pureza_estim
+
+    suma_abundancias = retenidas["Abundancia (%)"].astype(float).sum()
+    if suma_abundancias == 0:
+        return pureza_estim
+
+    pureza_corr = (abundancia_obj / suma_abundancias) * pureza_estim
+    return round(pureza_corr, 2)
+
 # ⚗️ Estrategia de Purificación
 st.header("⚗️ Estrategia de Purificación")
 
