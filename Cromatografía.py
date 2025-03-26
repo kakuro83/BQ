@@ -270,3 +270,4 @@ def cargar_csv_desde_github(url_raw, nombre, header='infer', names=None):
 
         except Exception as e:
             st.error(f"❌ Error al calcular los resultados finales: {e}")
+
