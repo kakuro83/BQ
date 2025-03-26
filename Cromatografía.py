@@ -208,18 +208,17 @@ if proteina_seleccionada != "Seleccionar proteína":
                 pureza_inicial = pureza_corr
                 recuperacion_anterior = recuperacion
 
-    # Resultados Finales del Proceso
+        # Resultados Finales del Proceso
     st.subheader("💰 Resultados Finales del Proceso")
     st.markdown("Estos valores consideran únicamente la **última etapa procesada**.")
 
-    # Extraer niveles desde df_datos
     try:
         niveles = [1, 2, 3, 4]
         precios = {}
         umbrales = {}
         for n in niveles:
-            valor = float(df_datos[df_datos["Parametro"] == f"Valor comercial nivel {n} (USD)"]["Valor"].values[0])
-            pureza_min = float(df_datos[df_datos["Parametro"] == f"Pureza mínima nivel {n} (%)"]["Valor"].values[0])
+            valor = float(df_datos[df_datos["Parámetro"] == f"Valor comercial nivel {n} (USD)"]["Valor"].values[0])
+            pureza_min = float(df_datos[df_datos["Parámetro"] == f"Pureza mínima nivel {n} (%)"]["Valor"].values[0])
             precios[n] = valor
             umbrales[n] = pureza_min
 
@@ -231,7 +230,7 @@ if proteina_seleccionada != "Seleccionar proteína":
 
         valor_unitario_usd_mg = precios[nivel_aplicado]
         ganancia_bruta = recuperacion_anterior * valor_unitario_usd_mg
-        costo_operativo = float(df_datos[df_datos["Parametro"] == "Costos fijos operativos (USD/h)"]["Valor"].values[0])
+        costo_operativo = float(df_datos[df_datos["Parámetro"] == "Costos fijos operativos (USD/h)"]["Valor"].values[0])
         ganancia_neta = ganancia_bruta - costos_acumulados - (costo_operativo * tiempo_total_h)
         rentabilidad = ganancia_neta / tiempo_total_h if tiempo_total_h > 0 else 0
 
@@ -246,4 +245,3 @@ if proteina_seleccionada != "Seleccionar proteína":
 
     except Exception as e:
         st.error(f"❌ Error al calcular los resultados finales: {e}")
-
