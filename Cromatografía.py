@@ -85,6 +85,9 @@ with st.expander("📌 Ver parámetros generales del sistema"):
     else:
         st.warning("⚠️ No se pudo cargar correctamente la hoja de parámetros.")
 
+url_estudiantes = "https://raw.githubusercontent.com/kakuro83/BQ/main/Estudiantes.txt"
+df_estudiantes = cargar_csv_desde_github(url_estudiantes, "Estudiantes", header=None, names=["Estudiante"])
+
 # 🎓 Selección de participante y proteína
 st.subheader("🎓 Selección de Participante y Proteína")
 col1, col2 = st.columns(2)
