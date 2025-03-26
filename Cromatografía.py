@@ -182,11 +182,8 @@ if proteina_seleccionada != "Seleccionar proteína":
                 fs = factor_saturacion(carga, capacidad)
 
                 # Recuperación
-                if fs > 1:
-                    recuperacion = recuperacion_proteina(recuperacion_pct, fs, mezcla_etapa, pureza_inicial)
-                else:
-                    recuperacion = (recuperacion_pct / 100) * mezcla_etapa * (pureza_inicial / 100)
-
+                recuperacion = recuperacion_proteina(recuperacion_pct, fs, mezcla_etapa, pureza_inicial)
+                
                 # Pureza
                 pureza_estim = calcular_pureza(velocidad, pureza_base, vmax, pmax, pureza_inicial)
                 pureza_corr = ajustar_pureza_por_selectividad(tecnica, pureza_estim, df_bandas)
