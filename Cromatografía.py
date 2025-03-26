@@ -39,6 +39,7 @@ def cargar_csv_desde_github(url_raw, nombre, header='infer', names=None):
         st.error(f"❌ Error al cargar la hoja '{nombre}': {e}")
         return pd.DataFrame()
 
+url_datos = "https://raw.githubusercontent.com/kakuro83/BQ/main/Datos.csv"
 df_datos = cargar_csv_desde_github(url_datos, "Datos")
 
 with st.expander("📌 Ver parámetros generales del sistema"):
