@@ -23,7 +23,6 @@ url_datos = "https://raw.githubusercontent.com/kakuro83/BQ/main/Datos.csv"
 url_estudiantes = "https://raw.githubusercontent.com/kakuro83/BQ/main/Estudiantes.txt"
 
 # Cargar los archivos necesarios
-df_ejercicio = cargar_hoja("Ejercicio", sheets["Ejercicio"])
 df_purificacion = cargar_csv_desde_github(url_purificacion, "Purificación")
 df_datos = cargar_csv_desde_github(url_datos, "Datos")
 df_estudiantes = cargar_csv_desde_github(url_estudiantes, "Estudiantes", header=None, names=["Estudiante"])
