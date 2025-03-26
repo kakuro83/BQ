@@ -343,3 +343,7 @@ try:
     st.markdown(f"- 💰 **Ganancia neta estimada:** `{ganancia_neta:.2f} USD` {emoji_ganancia}")
     st.markdown(f"- 📈 **Rentabilidad:** `{rentabilidad:.2f} USD/h`")
     st.caption(f"Nivel de pureza comercial aplicado: {nivel_aplicado} (≥ {umbrales[nivel_aplicado]}%) → {valor_unitario_usd_mg} USD/mg")
+
+except Exception as e:
+    st.error(f"❌ Error al calcular los resultados finales: {e}")
+
