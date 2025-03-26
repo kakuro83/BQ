@@ -363,8 +363,11 @@ for i in range(1, 5):
     if tecnica and tecnica != "Seleccionar":
         if corridas is not None and velocidad is not None:
             tecnica_sigla = tecnica.strip().lower()
-            if tecnica_sigla in siglas_manual:
-                sigla = siglas_manual[tecnica_sigla]
+            tecnica_lower = tecnica.lower()
+            if "his" in tecnica_lower:
+                sigla = "His"
+            elif "lectina" in tecnica_lower:
+                sigla = "Lec"
             else:
                 sigla = tecnica.split()[0].upper()
             codigo_etapas.append(f"{sigla},{corridas},{velocidad}")
