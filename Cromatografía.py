@@ -38,3 +38,48 @@ def cargar_csv_desde_github(url_raw, nombre, header='infer', names=None):
     except Exception as e:
         st.error(f"❌ Error al cargar la hoja '{nombre}': {e}")
         return pd.DataFrame()
+
+df_datos = cargar_csv_desde_github(url_datos, "Datos")
+
+with st.expander("📌 Ver parámetros generales del sistema"):
+    st.markdown("<h4 style='text-align: center;'>📋 Parámetros Generales</h4>", unsafe_allow_html=True)
+
+    if not df_datos.empty:
+        # Mostrar todos los parámetros excepto los de nivel comercial
+        for _, fila in df_datos.iterrows():
+            parametro = fila["Parámetro"]
+            if "Valor comercial nivel" not in parametro and "Pureza mínima nivel" not in parametro:
+                valor = fila["Valor"]
+                st.markdown(f"- **{parametro}:** {valor}")
+
+        # Construir tabla con los niveles de pureza y precios
+        try:
+            niveles = []
+            precios = []
+            umbrales = []
+
+            for i in range(1, 5):
+                valor_str = df_datos[df_datos["Parámetro"] == f"Valor comercial nivel {i} (USD)"]["Valor"].values[0]
+                pureza_str = df_datos[df_datos["Parámetro"] == f"Pureza mínima nivel {i} (%)"]["Valor"].values[0]
+                niveles.append(f"Nivel {i}")
+                precios.append(f"{valor_str} USD/mg")
+                umbrales.append(f"≥ {pureza_str} %")
+
+            df_precios = pd.DataFrame({
+                "Nivel de Pureza": niveles,
+                "Pureza mínima": umbrales,
+                "Precio por mg": precios
+            })
+
+            st.markdown("<h5 style='text-align: center;'>💰 Niveles de Pureza Comercial</h5>", unsafe_allow_html=True)
+            st.dataframe(
+                df_precios.style.set_properties(**{"text-align": "center"}).set_table_styles(
+                    [{"selector": "th", "props": [("text-align", "center")]}]
+                ),
+                use_container_width=True,
+                hide_index=True
+            )
+        except Exception as e:
+            st.error(f"⚠️ No fue posible generar la tabla de precios: {e}")
+    else:
+        st.warning("⚠️ No se pudo cargar correctamente la hoja de parámetros.")
