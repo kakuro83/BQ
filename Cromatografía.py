@@ -191,7 +191,8 @@ if proteina_seleccionada != "Seleccionar proteína":
                 # Tiempo y costo
                 tiempo_min = calcular_tiempo(carga, velocidad, corridas)
                 tiempo_h = tiempo_min / 60
-                costo_total = calcular_costo(costo_columna, corridas)
+                costo_operativo = valor_str = df_datos[df_datos["Parámetro"] == f"Costos fijos operativos (USD/h)"]["Valor"].values[0]
+                costo_total = calcular_costo(costo_columna, corridas) + tiempo_h * costo_operativo
 
                 # Acumular totales
                 costos_acumulados += costo_total
