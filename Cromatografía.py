@@ -199,6 +199,22 @@ También debes tener en cuenta las **limitaciones técnicas** de ciertas columna
 Si en alguna etapa seleccionas una columna **inadecuada** para las propiedades de la proteína objetivo, el sistema te lo advertirá para que puedas ajustar tu estrategia.
 """)
 
+# Información de técnicas de purificación
+st.markdown("### 🧪 Detalles de cada técnica disponible")
+tecnica_info = st.selectbox("Selecciona una técnica para revisar su información:", df_purificacion["Técnica"].dropna().tolist())
+
+fila_tec = df_purificacion[df_purificacion["Técnica"] == tecnica_info]
+if not fila_tec.empty:
+    fila = fila_tec.iloc[0]
+    st.markdown(f"""
+- **Capacidad:** {fila['Capacidad (mg)']} mg  
+- **Costo por corrida:** {fila['Costo (USD)']} USD  
+- **Recuperación estimada:** {fila['Recuperación (%)']} %  
+- **Pureza base esperada:** {fila['Pureza base (%)']} %  
+- **Velocidad media:** {fila['Velocidad media (mg/min)']} mg/min  
+- **Pureza máxima alcanzable:** {fila['Pureza máxima (%)']} %
+""")
+
 # Obtener info de la proteína objetivo
 objetivo = df_bandas[df_bandas["Propiedad estructural"].str.lower() == "objetivo"]
 if not objetivo.empty:
