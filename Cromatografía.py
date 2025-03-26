@@ -86,3 +86,46 @@ with st.expander("📌 Ver parámetros generales del sistema"):
             st.error(f"⚠️ No fue posible generar la tabla de precios: {e}")
     else:
         st.warning("⚠️ No se pudo cargar correctamente la hoja de parámetros.")
+
+# Selección de estudiante y proteína
+st.subheader("🎓 Selección de Participante y Proteína")
+col1, col2 = st.columns(2)
+
+lista_estudiantes = df_estudiantes["Estudiante"].dropna().tolist()
+proteinas_disponibles = df_ejercicio["Nombre"].dropna().unique().tolist()
+
+with col1:
+    estudiante_seleccionado = st.selectbox("👤 Estudiante:", ["Seleccionar estudiante"] + lista_estudiantes)
+
+with col2:
+    proteina_seleccionada = st.selectbox("🧪 Proteína objetivo:", ["Seleccionar proteína"] + proteinas_disponibles)
+
+if estudiante_seleccionado == "Seleccionar estudiante" or proteina_seleccionada == "Seleccionar proteína":
+    st.info("Por favor, selecciona un estudiante y una proteína para continuar.")
+
+# Mostrar información de la proteína seleccionada
+elif proteina_seleccionada != "Seleccionar proteína":
+    df_proteina = df_ejercicio[df_ejercicio["Nombre"] == proteina_seleccionada]
+
+    st.subheader("🔬 Información de la proteína seleccionada")
+    columnas_info = ["Nombre", "Carga", "Etiquetas", "Propiedades", "Cantidad (mg)"]
+    st.dataframe(df_proteina[columnas_info].style.set_properties(**{"text-align": "center"}).set_table_styles(
+        [{"selector": "th", "props": [("text-align", "center")]}]),
+        use_container_width=True, hide_index=True)
+
+    # Procesar bandas SDS-PAGE
+    bandas = ["A", "B", "C", "D", "E"]
+    columnas_bandas = ["Recorrido", "Abundancia (%)", "Carga neta", "Propiedad estructural"]
+    data_bandas = {col: [] for col in columnas_bandas}
+
+    for banda in bandas:
+        valores = df_proteina[f"Banda {banda}"].values[0].split(";")
+        for i, col in enumerate(columnas_bandas):
+            data_bandas[col].append(valores[i].strip())
+
+    df_bandas = pd.DataFrame(data_bandas)
+
+    st.subheader("🧫 Bandas SDS-PAGE de la mezcla")
+    st.dataframe(df_bandas.style.set_properties(**{"text-align": "center"}).set_table_styles(
+        [{"selector": "th", "props": [("text-align", "center")]}]),
+        use_container_width=True, hide_index=True)
