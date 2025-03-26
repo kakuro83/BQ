@@ -140,6 +140,9 @@ if proteina_seleccionada != "Seleccionar proteína":
         hide_index=True
     )
 
+url_purificacion = "https://raw.githubusercontent.com/kakuro83/BQ/main/Purificaci%C3%B3n.csv"
+df_purificacion = cargar_csv_desde_github(url_purificacion, "Purificación")
+
 # ⚗️ Estrategia de Purificación
 st.header("⚗️ Estrategia de Purificación")
 
