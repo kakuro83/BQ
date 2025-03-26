@@ -39,39 +39,40 @@ def cargar_csv_desde_github(url_raw, nombre, header='infer', names=None):
         st.error(f"❌ Error al cargar la hoja '{nombre}': {e}")
         return pd.DataFrame()
 
-# Cargar los datos desde Google Sheets y GitHub
-df_ejercicio = cargar_hoja("Ejercicio", sheets["Ejercicio"])
-
-url_purificacion = "https://raw.githubusercontent.com/kakuro83/BQ/main/Purificaci%C3%B3n.csv"
-df_purificacion = cargar_csv_desde_github(url_purificacion, "Purificación")
-
-url_datos = "https://raw.githubusercontent.com/kakuro83/BQ/main/Datos.csv"
-df_datos = cargar_csv_desde_github(url_datos, "Datos")
-
-url_estudiantes = "https://raw.githubusercontent.com/kakuro83/BQ/main/Estudiantes.txt"
-df_estudiantes = cargar_csv_desde_github(url_estudiantes, "Estudiantes", header=None, names=["Estudiante"])
-
-# 📌 Datos Fijos – Mostrar en expander como lista
+# 📌 Datos Fijos – Mostrar en expander como lista y tabla de precios
 with st.expander("📌 Ver parámetros generales del sistema"):
     st.markdown("<h4 style='text-align: center;'>📋 Parámetros Generales</h4>", unsafe_allow_html=True)
+
+    # Mostrar todos los parámetros excepto los de precio/pureza nivel
     for _, fila in df_datos.iterrows():
         parametro = fila["Parámetro"]
-        valor = fila["Valor"]
-        st.markdown(f"- **{parametro}:** {valor}")
+        if "Valor comercial nivel" not in parametro and "Pureza mínima nivel" not in parametro:
+            valor = fila["Valor"]
+            st.markdown(f"- **{parametro}:** {valor}")
 
-# 🧪 Información de columnas: selección individual
-st.markdown("<h3 style='text-align: center'>🧪 Información de las Columnas de Purificación</h3>", unsafe_allow_html=True)
-tecnica_elegida = st.selectbox("Selecciona una técnica de purificación:", df_purificacion["Técnica"].dropna().tolist())
+    # Construir tabla con los niveles de pureza y precios
+    niveles = []
+    precios = []
+    umbrales = []
 
-fila_columna = df_purificacion[df_purificacion["Técnica"] == tecnica_elegida]
-if not fila_columna.empty:
-    fila = fila_columna.iloc[0]
-    st.markdown("**📋 Detalles de la columna seleccionada:**")
-    st.markdown(f"""
-- **Capacidad:** {fila['Capacidad (mg)']} mg  
-- **Costo:** {fila['Costo (USD)']} USD  
-- **Recuperación estimada:** {fila['Recuperación (%)']} %  
-- **Pureza base:** {fila['Pureza base (%)']} %  
-- **Velocidad media:** {fila['Velocidad media (mg/min)']} mg/min  
-- **Pureza máxima alcanzable:** {fila['Pureza máxima (%)']} %
-""")
+    for i in range(1, 5):
+        valor_str = df_datos[df_datos["Parámetro"] == f"Valor comercial nivel {i} (USD)"]["Valor"].values[0]
+        pureza_str = df_datos[df_datos["Parámetro"] == f"Pureza mínima nivel {i} (%)"]["Valor"].values[0]
+        niveles.append(f"Nivel {i}")
+        precios.append(f"{valor_str} USD/mg")
+        umbrales.append(f"≥ {pureza_str} %")
+
+    df_precios = pd.DataFrame({
+        "Nivel de Pureza": niveles,
+        "Pureza mínima": umbrales,
+        "Precio por mg": precios
+    })
+
+    st.markdown("<h5 style='text-align: center;'>💰 Niveles de Pureza Comercial</h5>", unsafe_allow_html=True)
+    st.dataframe(
+        df_precios.style.set_properties(**{"text-align": "center"}).set_table_styles(
+            [{"selector": "th", "props": [("text-align", "center")]}]
+        ),
+        use_container_width=True,
+        hide_index=True
+    )
