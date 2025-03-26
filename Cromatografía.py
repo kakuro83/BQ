@@ -14,7 +14,7 @@ from ecuaciones import (
 )
 
 st.set_page_config(page_title="Olimpiada de Bioquímica – Purificación de Proteínas")
-st.title("🏆 Olimpiada de Bioquímica – Estrategia de Purificación de Proteínas")
+st.title("🏆 Estrategia de Purificación de Proteínas")
 
 url_hoja = "https://docs.google.com/spreadsheets/d/1Rqk1GZ3Y5KKNT5VjTXI-pbFhlVZ-c-XcCCjmXAM6DiQ/export?format=csv&gid="
 sheets = {"Ejercicio": "0"}
@@ -94,15 +94,23 @@ st.dataframe(df_purificacion)
 
 # Selección de estudiante y proteína
 lista_estudiantes = df_estudiantes["Estudiante"].dropna().tolist()
-estudiante_seleccionado = st.selectbox("Selecciona tu nombre:", ["Seleccionar estudiante"] + lista_estudiantes)
+st.subheader("🎓 Selección de Participante y Proteína")
+col1, col2 = st.columns(2)
 
-proteinas_disponibles = df_ejercicio["Nombre"].dropna().unique().tolist()
-proteina_seleccionada = st.selectbox("Selecciona la proteína objetivo:", ["Seleccionar proteína"] + proteinas_disponibles)
+with col1:
+    estudiante_seleccionado = st.selectbox("👤 Estudiante:", ["Seleccionar estudiante"] + lista_estudiantes)
+
+with col2:
+    proteina_seleccionada = st.selectbox("🧪 Proteína objetivo:", ["Seleccionar proteína"] + proteinas_disponibles)
+
+if estudiante_seleccionado == "Seleccionar estudiante" or proteina_seleccionada == "Seleccionar proteína":
+    st.info("Por favor, selecciona un estudiante y una proteína para continuar.")
 
 if proteina_seleccionada != "Seleccionar proteína":
     df_proteina = df_ejercicio[df_ejercicio["Nombre"] == proteina_seleccionada]
     st.subheader("🔬 Información de la proteína seleccionada")
-    st.dataframe(df_proteina)
+    columnas_info = ["Nombre", "Carga", "Etiquetas", "Propiedades", "Cantidad (mg)"]
+    st.dataframe(df_proteina[columnas_info].style.set_properties(**{"text-align": "center"}).set_table_styles([{"selector": "th", "props": [("text-align", "center")]}]), use_container_width=True)
 
     # Procesamiento de bandas SDS-PAGE
     bandas = ["A", "B", "C", "D", "E"]
@@ -120,6 +128,26 @@ if proteina_seleccionada != "Seleccionar proteína":
 
 # Bloque de estrategia: diseño de hasta 4 etapas
     st.header("⚗️ Estrategia de Purificación")
+
+with st.expander("📘 Consideraciones importantes"):
+    st.markdown("""
+Cada **corrida** representa la cantidad de mezcla de proteínas que se procesa por la columna. Es importante tener en cuenta la **capacidad máxima** de cada columna para evitar sobrecargas. Para ello, utilizamos el **Factor de Saturación (Fs)**:
+
+- Si **Fs > 1**, la columna está sobrecargada. Esto no siempre es negativo, pero puede reducir la **recuperación**.
+- Si **Fs < 1**, la recuperación puede mejorar, pero se requieren más corridas, lo que **incrementa el costo total del proceso**.
+
+La **pureza** de la proteína es clave para definir su **valor comercial**. Un factor determinante en esta pureza es la **velocidad de procesamiento**:
+
+- Velocidades **menores** a la velocidad media aumentan la pureza, pero **prolongan el tiempo** (y por tanto, los costos).
+- Velocidades **mayores** aceleran el proceso, pero **reducen la pureza**, afectando el precio de venta.
+
+También debes tener en cuenta las **limitaciones técnicas** de ciertas columnas:
+
+- Las de **intercambio iónico** discriminan según la **carga neta** de la proteína.
+- Las de **exclusión por tamaño (SEC)** dependen del **peso molecular**.
+
+Si en alguna etapa seleccionas una columna **inadecuada** para las propiedades de la proteína objetivo, el sistema te lo advertirá para que puedas ajustar tu estrategia.
+""")
 
     # Obtener info de la proteína objetivo desde SDS-PAGE
     objetivo = df_bandas[df_bandas["Propiedad estructural"].str.lower() == "objetivo"]
@@ -247,9 +275,11 @@ if proteina_seleccionada != "Seleccionar proteína":
         st.markdown(f"- 📦 **Recuperación final:** `{recuperacion_anterior:.2f}` mg")
         st.markdown(f"- ⏱️ **Tiempo total del proceso:** `{tiempo_total_h:.2f}` horas")
         st.markdown(f"- 💲 **Costo total acumulado:** `{costos_acumulados:.2f} USD`")
-        st.markdown(f"- 💰 **Ganancia neta estimada:** `{ganancia_neta:.2f} USD`")
+        emoji_ganancia = "😊" if ganancia_neta >= 0 else "😢"
+st.markdown(f"- 💰 **Ganancia neta estimada:** `{ganancia_neta:.2f} USD` {emoji_ganancia}")
         st.markdown(f"- 📈 **Rentabilidad:** `{rentabilidad:.2f} USD/h`")
         st.caption(f"Nivel de pureza comercial aplicado: {nivel_aplicado} (≥ {umbrales[nivel_aplicado]}%) → {valor_unitario_usd_mg} USD/mg")
 
     except Exception as e:
         st.error(f"❌ Error al calcular los resultados finales: {e}")
+
