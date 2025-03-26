@@ -207,3 +207,43 @@ if proteina_seleccionada != "Seleccionar proteína":
                 # Preparar condiciones para la siguiente etapa
                 pureza_inicial = pureza_corr
                 recuperacion_anterior = recuperacion
+
+    # Resultados Finales del Proceso
+    st.subheader("💰 Resultados Finales del Proceso")
+    st.markdown("Estos valores consideran únicamente la **última etapa procesada**.")
+
+    # Extraer niveles desde df_datos
+    try:
+        niveles = [1, 2, 3, 4]
+        precios = {}
+        umbrales = {}
+        for n in niveles:
+            valor = float(df_datos[df_datos["Parametro"] == f"Valor comercial nivel {n} (USD)"]["Valor"].values[0])
+            pureza_min = float(df_datos[df_datos["Parametro"] == f"Pureza mínima nivel {n} (%)"]["Valor"].values[0])
+            precios[n] = valor
+            umbrales[n] = pureza_min
+
+        # Determinar nivel de precio por pureza final
+        nivel_aplicado = max([n for n in niveles if pureza_inicial >= umbrales[n]], default=None)
+        if nivel_aplicado is None:
+            st.error("❌ No se alcanzó ningún nivel mínimo de pureza comercial.")
+            st.stop()
+
+        valor_unitario_usd_mg = precios[nivel_aplicado]
+        ganancia_bruta = recuperacion_anterior * valor_unitario_usd_mg
+        costo_operativo = float(df_datos[df_datos["Parametro"] == "Costos fijos operativos (USD/h)"]["Valor"].values[0])
+        ganancia_neta = ganancia_bruta - costos_acumulados - (costo_operativo * tiempo_total_h)
+        rentabilidad = ganancia_neta / tiempo_total_h if tiempo_total_h > 0 else 0
+
+        # Mostrar resultados finales
+        st.markdown(f"- 🧪 **Pureza final alcanzada:** `{pureza_inicial:.2f}%`")
+        st.markdown(f"- 📦 **Recuperación final:** `{recuperacion_anterior:.2f}` mg")
+        st.markdown(f"- ⏱️ **Tiempo total del proceso:** `{tiempo_total_h:.2f}` horas")
+        st.markdown(f"- 💲 **Costo total acumulado:** `{costos_acumulados:.2f} USD`")
+        st.markdown(f"- 💰 **Ganancia neta estimada:** `{ganancia_neta:.2f} USD`")
+        st.markdown(f"- 📈 **Rentabilidad:** `{rentabilidad:.2f} USD/h`")
+        st.caption(f"Nivel de pureza comercial aplicado: {nivel_aplicado} (≥ {umbrales[nivel_aplicado]}%) → {valor_unitario_usd_mg} USD/mg")
+
+    except Exception as e:
+        st.error(f"❌ Error al calcular los resultados finales: {e}")
+
