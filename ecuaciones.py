@@ -22,7 +22,7 @@ def recuperacion_proteina(recuperacion_pct, fs, mezcla_mg, pureza_in):
     if fs > 1:
         r = (rb / fs) * mezcla_mg * pi
     else:
-        mejora = rb + (0.95 - rb) * (1 - fs)  # tiende suavemente a 0.95
+        mejora = rb + (1.1 * rb - rb) * (1 - fs)  # tiende suavemente a 0.95
         r = mejora * mezcla_mg * pi
     return r
 
