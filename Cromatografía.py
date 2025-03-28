@@ -392,7 +392,7 @@ st.subheader("🔒 Código de Validación")
 if codigo_etapas:
     resumen_etapas = "-".join(codigo_etapas)
     resumen_valores = f"{ganancia_neta:.2f},{rentabilidad:.2f}"
-    codigo_validacion = f"{resumen_etapas}:{resumen_valores}"
+    codigo_validacion = f"{resumen_etapas},{resumen_valores}"
 
     st.text_input("Código generado (puedes copiarlo):", value=codigo_validacion, key="codigo_generado")
     st.caption("Este código resume tu estrategia completa. Puedes usarlo para validar o comparar resultados.")
