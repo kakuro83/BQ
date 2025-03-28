@@ -87,26 +87,23 @@ with st.expander("📌 Ver parámetros generales del sistema"):
 
 df_ejercicio = cargar_hoja("Ejercicio", sheets["Ejercicio"])
 
-# 🎓 Selección de participante y proteína
-st.subheader("🎓 Selección de Participante y Proteína")
+# 🎓 Selección de proteína
+st.subheader("🎓 Selección de Proteína")
 proteinas_disponibles = df_ejercicio["Nombre"].dropna().unique().tolist()
+
+# Verifica si hay un cambio en la proteína seleccionada
+if "proteina_anterior" not in st.session_state:
+    st.session_state.proteina_anterior = None
+
 proteina_seleccionada = st.selectbox("🧪 Proteína objetivo:", ["Seleccionar proteína"] + proteinas_disponibles)
 
-if proteina_seleccionada == "Seleccionar proteína":
-    st.info("Por favor, selecciona una proteína para continuar.")
-else:
-    df_proteina = df_ejercicio[df_ejercicio["Nombre"] == proteina_seleccionada]
-
-    # Mostrar información de la proteína (filtrando columnas relevantes)
-    columnas_info = ["Nombre", "Carga", "Etiquetas", "Propiedades", "Cantidad (mg)"]
-    st.subheader("🔬 Información de la proteína seleccionada")
-    st.dataframe(
-        df_proteina[columnas_info]
-        .style.set_properties(**{"text-align": "center"})
-        .set_table_styles([{"selector": "th", "props": [("text-align", "center")]}]),
-        use_container_width=True,
-        hide_index=True
-    )
+if proteina_seleccionada != st.session_state.proteina_anterior:
+    # Reiniciar etapas si la proteína cambió
+    for i in range(1, 5):
+        st.session_state[f"tecnica_{i}"] = "Seleccionar"
+        st.session_state[f"corridas_{i}"] = 1
+        st.session_state[f"velocidad_{i}"] = 1.0
+    st.session_state.proteina_anterior = proteina_seleccionada
 
 # 🧫 Procesamiento de bandas SDS-PAGE (solo si hay proteína seleccionada)
 if proteina_seleccionada != "Seleccionar proteína":
